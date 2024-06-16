@@ -3,7 +3,7 @@ import ProjectsPage from './pages/ProjectsPage';
 import CriteriaConfigPage from './pages/CriteriaConfigPage';
 import CalculationPage from './pages/CalculationPage';
 import './index.css';
-import outputs from '/amplify_outputs.json';
+import outputs from '@/amplify_outputs.json';
 import { Authenticator } from '@aws-amplify/ui-react';
 import { Amplify } from 'aws-amplify';
 import "@aws-amplify/ui-react/styles.css";
