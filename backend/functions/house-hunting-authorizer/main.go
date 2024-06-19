@@ -18,7 +18,7 @@ func HandleRequest(events *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2
 	fmt.Println("Hello, World!")
 	eventJson, _ := json.Marshal(events)
 	fmt.Println(events)
-	fmt.Println(eventJson)
+	fmt.Printf("%s", eventJson)
 
 	lr := generateAllow()
 
