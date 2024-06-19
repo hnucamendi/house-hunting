@@ -8,20 +8,13 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-func generateAllow() *events.APIGatewayV2CustomAuthorizerSimpleResponse {
-	return &events.APIGatewayV2CustomAuthorizerSimpleResponse{
-		IsAuthorized: true,
-	}
-}
-
 func HandleRequest(events *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2CustomAuthorizerSimpleResponse, error) {
 	fmt.Println("Hello, World!")
 	eventJson, _ := json.Marshal(events)
 	fmt.Println(events.RequestContext.Authentication)
 	fmt.Printf("HERE TAMOCHIM %s\n", eventJson)
 
-	lr := generateAllow()
-
+	lr := lambdautils.GenerateAllow()
 	return lr, nil
 
 }
