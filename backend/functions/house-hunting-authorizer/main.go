@@ -17,8 +17,8 @@ func generateAllow() *events.APIGatewayV2CustomAuthorizerSimpleResponse {
 func HandleRequest(events *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2CustomAuthorizerSimpleResponse, error) {
 	fmt.Println("Hello, World!")
 	eventJson, _ := json.Marshal(events)
-	fmt.Println(events)
-	fmt.Printf("%s", eventJson)
+	fmt.Println(events.RequestContext.Authentication)
+	fmt.Printf("HERE TAMOCHIM %s\n", eventJson)
 
 	lr := generateAllow()
 
