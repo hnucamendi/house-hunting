@@ -15,11 +15,11 @@ func generateAllow() *events.APIGatewayV2CustomAuthorizerSimpleResponse {
 	}
 }
 
-func HandleRequest(event *events.APIGatewayV2HTTPRequest) *events.APIGatewayV2CustomAuthorizerSimpleResponse {
+func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2CustomAuthorizerSimpleResponse, error) {
 	eventJson, err := json.Marshal(event)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to marshal event: %s\n", err)
-		return generateAllow()
+		return generateAllow(), nil
 	}
 
 	fmt.Println("Authorization Header:", event.Headers["Authorization"])
@@ -30,11 +30,11 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) *events.APIGatewayV2Cu
 	authHeader := event.Headers["Authorization"]
 	if authHeader == "" {
 		fmt.Println("Authorization header missing")
-		return generateAllow()
+		return generateAllow(), nil
 	}
 
 	// If the authorization is successful
-	return generateAllow()
+	return generateAllow(), nil
 }
 
 func main() {
