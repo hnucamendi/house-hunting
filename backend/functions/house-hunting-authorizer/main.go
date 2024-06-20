@@ -15,21 +15,14 @@ func generateAllow() *events.APIGatewayV2CustomAuthorizerSimpleResponse {
 	}
 }
 
-func generateDeny() *events.APIGatewayV2CustomAuthorizerSimpleResponse {
-	return &events.APIGatewayV2CustomAuthorizerSimpleResponse{
-		IsAuthorized: false,
-	}
-}
-
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2CustomAuthorizerSimpleResponse, error) {
 	eventJson, err := json.Marshal(event)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to marshal event: %s\n", err)
-		return generateDeny(), nil
+		return generateAllow(), nil
 	}
 
 	fmt.Println("Authorization Header:", event.Headers["Authorization"])
-	fmt.Println("RequestContext Authentication:", event.RequestContext.Authentication)
 	fmt.Printf("Event JSON: %s\n", eventJson)
 
 	// Add your custom authorization logic here
@@ -37,7 +30,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2C
 	authHeader := event.Headers["Authorization"]
 	if authHeader == "" {
 		fmt.Println("Authorization header missing")
-		return generateDeny(), nil
+		return generateAllow(), nil
 	}
 
 	// If the authorization is successful
