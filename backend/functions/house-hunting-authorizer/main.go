@@ -22,7 +22,14 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2C
 		return generateAllow(), nil
 	}
 
-	fmt.Println("Authorization Header:", event.Headers["Authorization"])
+	headerJson, err := json.Marshal(event.Headers)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Failed to marshal event: %s\n", err)
+		return generateAllow(), nil
+	}
+
+	fmt.Println("Authorization Header:", event.Headers["authorization"])
+	fmt.Println("Header JSON", headerJson)
 	fmt.Printf("Event JSON: %s\n", eventJson)
 
 	// Add your custom authorization logic here
