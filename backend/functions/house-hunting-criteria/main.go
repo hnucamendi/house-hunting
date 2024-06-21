@@ -6,8 +6,9 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 )
 
-func HandleRequest() {
+func HandleRequest() (string, error) {
 	fmt.Println("Hello World")
+	return "Hello World", nil
 }
 
 func main() {
