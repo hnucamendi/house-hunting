@@ -29,12 +29,12 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2C
 	}
 
 	fmt.Println("Authorization Header:", event.Headers["authorization"])
-	fmt.Println("Header JSON", headerJson)
+	fmt.Printf("Header JSON: %s\n", headerJson)
 	fmt.Printf("Event JSON: %s\n", eventJson)
 
 	// Add your custom authorization logic here
 	// Example: Check if the Authorization header is present
-	authHeader := event.Headers["Authorization"]
+	authHeader := event.Headers["authorization"]
 	if authHeader == "" {
 		fmt.Println("Authorization header missing")
 		return generateAllow(), nil
