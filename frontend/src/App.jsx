@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import LandingPage from './pages/ProjectsPage';
 import Criteria from './pages/Criteria';
 import Rating from './pages/Rating';
-import Nav from './components/Nav';
 import './index.css';
 
 const App = () => {
