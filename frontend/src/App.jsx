@@ -11,6 +11,7 @@ const App = () => {
     <Nav />
       <div className="App">
         <h1>House Rating App</h1>
+        <h1>House Rating App</h1>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/house-criteria" element={<Criteria />} />
