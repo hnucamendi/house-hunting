@@ -1,0 +1,15 @@
+name: Deploy
+on:
+  release:
+    types: [published]
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  deploy_react:
+    uses: hnucamendi/shared-gha-workflows/.github/workflows/deploy-react.yml@master
+    with:
+      working_directory: "./frontend"
+      s3_bucket: "house-hunting.hnucamendi.me"
+      node_version: 20
+    secrets: inherit
