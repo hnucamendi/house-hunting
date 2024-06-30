@@ -67,15 +67,19 @@ func parseJWT(token string) (JWTPayload, error) {
 }
 
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2CustomAuthorizerSimpleResponse, error) {
-	a, f := strings.CutPrefix(event.Headers["authorization"], "Bearer ")
-	if !f {
-		log.Printf("Authorization header malformed %s %v %v\n", event.Headers["authorization"], a, f)
+	authBearer, found := strings.CutPrefix(event.Headers["authorization"], "Bearer")
+	if !found {
+		log.Printf("Authorization header malformed %s %v %v\n", event.Headers["authorization"], authBearer, found)
 		return generateDeny(), nil
 	}
 
-	fmt.Printf("Header JSON: %s\n", a)
+	log.Printf("Authorization header: %s\n", authBearer)
 
-	p, err := parseJWT(a)
+	auth := strings.TrimSpace(authBearer)
+
+	fmt.Printf("Authorization header cleaned: %s\n", auth)
+
+	p, err := parseJWT(auth)
 	if err != nil {
 		log.Printf("Failed to parse JWT: %v\n", err)
 		return generateDeny(), nil
