@@ -69,7 +69,7 @@ func parseJWT(token string) (JWTPayload, error) {
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2CustomAuthorizerSimpleResponse, error) {
 	a, f := strings.CutPrefix(event.Headers["authorization"], "Bearer ")
 	if !f {
-		log.Println("Authorization header malformed")
+		log.Printf("Authorization header malformed %s %v %v\n", event.Headers["authorization"], a, f)
 		return generateDeny(), nil
 	}
 
