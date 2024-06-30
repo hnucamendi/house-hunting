@@ -36,7 +36,7 @@ func generateAllow() *events.APIGatewayV2CustomAuthorizerSimpleResponse {
 
 func generateDeny() *events.APIGatewayV2CustomAuthorizerSimpleResponse {
 	return &events.APIGatewayV2CustomAuthorizerSimpleResponse{
-		IsAuthorized: true,
+		IsAuthorized: false,
 	}
 }
 
