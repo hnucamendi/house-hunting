@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -19,12 +18,13 @@ type ProjectsRequest struct {
 }
 
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
-	var request ProjectsRequest
-	err := json.Unmarshal([]byte(event.Body), &request)
-	if err != nil {
+	id := event.PathParameters["id"]
+	project_id := event.PathParameters["project_id"]
+
+	if id == "" || project_id == "" {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 400,
-			Body:       fmt.Sprintf("Failed to parse request: %v", err),
+			Body:       "Missing id or project_id",
 		}, nil
 	}
 
@@ -34,17 +34,17 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		TableName: aws.String("UsersTable"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"id": {
-				S: &request.UserId,
+				S: &id,
 			},
 			"project_id": {
-				S: &request.ProjectId,
+				S: &project_id,
 			},
 		},
 	})
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
-			Body:       fmt.Sprintf("Failed to get item: %v\t%s %s\n", err, request.ProjectId, request.UserId),
+			Body:       fmt.Sprintf("Failed to get item: %v\t%s %s\n", err, id, project_id),
 		}, nil
 	}
 
