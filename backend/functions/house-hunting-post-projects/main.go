@@ -54,7 +54,6 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 			StatusCode: 500,
 			Body:       fmt.Sprintf("Failed to put item: %v", err),
 		}, nil
-
 	}
 
 	return &events.APIGatewayV2HTTPResponse{

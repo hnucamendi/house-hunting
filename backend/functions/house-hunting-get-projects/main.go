@@ -11,21 +11,11 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
-type Method string
-
 var sess = session.Must(session.NewSession())
 
-const (
-	UPLOAD Method = "UPLOAD"
-	FETCH  Method = "FETCH"
-)
-
 type ProjectsRequest struct {
-	ProjectId   string `json:"project_id"`
-	UserId      string `json:"user_id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Method      Method `json:"method"`
+	ProjectId string `json:"project_id"`
+	UserId    string `json:"user_id"`
 }
 
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
@@ -40,27 +30,27 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 
 	db := dynamodb.New(sess)
 
-	db.PutItem(&dynamodb.PutItemInput{
-		TableName: aws.String("house-hunting-projects"),
-		Item: map[string]*dynamodb.AttributeValue{
+	out, err := db.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String("ProjectsTable"),
+		Key: map[string]*dynamodb.AttributeValue{
 			"project_id": {
 				S: &payload.ProjectId,
 			},
 			"user_id": {
 				S: &payload.UserId,
 			},
-			"title": {
-				S: &payload.Title,
-			},
-			"description": {
-				S: &payload.Description,
-			},
 		},
 	})
+	if err != nil {
+		return &events.APIGatewayV2HTTPResponse{
+			StatusCode: 500,
+			Body:       fmt.Sprintf("Failed to put item: %v", err),
+		}, nil
+	}
 
 	return &events.APIGatewayV2HTTPResponse{
 		StatusCode: 200,
-		Body:       fmt.Sprintf("Hello, World! this is a test for house-hunting-projects"),
+		Body:       out.GoString(),
 	}, nil
 
 }
