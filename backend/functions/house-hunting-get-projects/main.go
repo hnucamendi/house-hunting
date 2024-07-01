@@ -33,7 +33,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 	out, err := db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String("UsersTable"),
 		Key: map[string]*dynamodb.AttributeValue{
-			"user_id": {
+			"id": {
 				S: &payload.ProjectId,
 			},
 			"project_id": {
