@@ -106,7 +106,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		fmt.Println("error unmarshaling response:", err)
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
-			Body:       fmt.Sprintf("failed to unmarshal response: %v\n%v\n%v\n", err, t, out.GoString()),
+			Body:       fmt.Sprintf("failed to unmarshal response: %v\n%s\n%v\n", err, t, out.GoString()),
 		}, nil
 	}
 
