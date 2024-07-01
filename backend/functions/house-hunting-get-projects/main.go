@@ -20,12 +20,12 @@ type ProjectsRequest struct {
 }
 
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
-	id := event.PathParameters["id"]
-	project_id := event.PathParameters["project_id"]
+	id := event.QueryStringParameters["id"]
+	project_id := event.QueryStringParameters["project_id"]
 
 	jevent, _ := json.Marshal(event)
 	log.Println(string(jevent))
-	log.Println(event.PathParameters)
+	log.Println(event.QueryStringParameters)
 
 	if id == "" || project_id == "" {
 		return &events.APIGatewayV2HTTPResponse{
