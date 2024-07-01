@@ -11,47 +11,53 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
-type StringValue struct {
-	S string `json:"S"`
-}
-
-type NumberValue struct {
-	N string `json:"N"`
-}
-
-type Note struct {
-	ID    StringValue `json:"id"`
-	Title StringValue `json:"title"`
-	Note  StringValue `json:"note"`
-}
-
-type Score struct {
-	ID    StringValue `json:"id"`
-	Title StringValue `json:"title"`
-	Score NumberValue `json:"score"`
-}
-
-type HouseEntry struct {
-	ID      StringValue `json:"id"`
-	Address StringValue `json:"address"`
-	Scores  []struct {
-		M Score `json:"M"`
-	} `json:"scores"`
-	Notes []struct {
-		M Note `json:"M"`
-	} `json:"notes"`
-}
-
-type Item struct {
-	ID           StringValue `json:"id"`
-	ProjectID    StringValue `json:"project_id"`
-	HouseEntries []struct {
-		M HouseEntry `json:"M"`
-	} `json:"house_entries"`
-}
-
 type Response struct {
-	Item Item `json:"Item"`
+	Item struct {
+		UserId       string `json:"id"`
+		ProjectId    string `json:"project_id"`
+		HouseEntries struct {
+			L []struct {
+				M struct {
+					Address struct {
+						S string `json:"S"`
+					} `json:"address"`
+					Id struct {
+						S string `json:"S"`
+					} `json:"id"`
+					Notes struct {
+						L []struct {
+							M struct {
+								Title struct {
+									S string `json:"S"`
+								} `json:"title"`
+								Note struct {
+									S string `json:"S"`
+								} `json:"note"`
+								Id struct {
+									S string `json:"S"`
+								} `json:"id"`
+							} `json:"M"`
+						} `json:"L"`
+					} `json:"notes"`
+					Scores struct {
+						L []struct {
+							M struct {
+								Title struct {
+									S string `json:"S"`
+								} `json:"title"`
+								Score struct {
+									N string `json:"N"`
+								} `json:"score"`
+								Id struct {
+									S string `json:"S"`
+								} `json:"id"`
+							} `json:"M"`
+						} `json:"L"`
+					} `json:"scores"`
+				} `json:"M"`
+			} `json:"L"`
+		} `json:"house_entries"`
+	} `json:"Item"`
 }
 
 var sess = session.Must(session.NewSession())
