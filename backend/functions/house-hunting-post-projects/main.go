@@ -14,24 +14,24 @@ import (
 var sess = session.Must(session.NewSession())
 
 type HouseNotes struct {
-	NoteId string `json:"note_id"`
+	NoteId string `json:"id"`
 	Note   string `json:"note"`
 }
 
 type HouseScores struct {
-	ScoreId string `json:"score_id"`
+	ScoreId string `json:"id"`
 	Score   int    `json:"score"`
 }
 
 type HouseEntry struct {
-	EntryId string        `json:"entry_id"`
+	EntryId string        `json:"id"`
 	Address string        `json:"address"`
 	Scores  []HouseScores `json:"scores"`
 	Notes   []HouseNotes  `json:"notes"`
 }
 
 type Project struct {
-	UserId       string       `json:"user_id"`
+	UserId       string       `json:"id"`
 	ProjectId    string       `json:"project_id"`
 	Title        string       `json:"title"`
 	Description  string       `json:"description"`
