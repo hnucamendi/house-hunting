@@ -36,15 +36,12 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 			"project_id": {
 				S: &payload.ProjectId,
 			},
-			"user_id": {
-				S: &payload.UserId,
-			},
 		},
 	})
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
-			Body:       fmt.Sprintf("Failed to put item: %v", err),
+			Body:       fmt.Sprintf("Failed to get item: %v", err),
 		}, nil
 	}
 
