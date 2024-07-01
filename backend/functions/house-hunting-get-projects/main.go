@@ -14,8 +14,8 @@ import (
 var sess = session.Must(session.NewSession())
 
 type ProjectsRequest struct {
-	ProjectId string `json:"project_id"`
 	UserId    string `json:"user_id"`
+	ProjectId string `json:"project_id"`
 }
 
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
@@ -31,10 +31,13 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 	db := dynamodb.New(sess)
 
 	out, err := db.GetItem(&dynamodb.GetItemInput{
-		TableName: aws.String("ProjectsTable"),
+		TableName: aws.String("UsersTable"),
 		Key: map[string]*dynamodb.AttributeValue{
-			"project_id": {
+			"user_id": {
 				S: &payload.ProjectId,
+			},
+			"project_id": {
+				S: &payload.UserId,
 			},
 		},
 	})

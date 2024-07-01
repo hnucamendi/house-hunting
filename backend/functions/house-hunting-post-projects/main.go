@@ -13,16 +13,29 @@ import (
 
 var sess = session.Must(session.NewSession())
 
-type ProjectsRequest struct {
-	ProjectId   string `json:"project_id"`
-	UserId      string `json:"user_id"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
+type HouseScores struct {
+	ScoreId string `json:"score_id"`
+	Score   int    `json:"score"`
+}
+
+type HouseEntry struct {
+	EntryId string        `json:"entry_id"`
+	Address string        `json:"address"`
+	Scores  []HouseScores `json:"scores"`
+	Notes   string        `json:"notes"`
+}
+
+type Project struct {
+	UserId       string       `json:"user_id"`
+	ProjectId    string       `json:"project_id"`
+	Title        string       `json:"title"`
+	Description  string       `json:"description"`
+	HouseEntries []HouseEntry `json:"house_entries"`
 }
 
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
-	var payload ProjectsRequest
-	err := json.Unmarshal([]byte(event.Body), &payload)
+	var project Project
+	err := json.Unmarshal([]byte(event.Body), &project)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 400,
@@ -30,22 +43,22 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
+	j, _ := json.Marshal(project.HouseEntries)
+	js := string(j)
+
 	db := dynamodb.New(sess)
 
 	out, err := db.PutItem(&dynamodb.PutItemInput{
-		TableName: aws.String("ProjectsTable"),
+		TableName: aws.String("UsersTable"),
 		Item: map[string]*dynamodb.AttributeValue{
-			"project_id": {
-				S: &payload.ProjectId,
-			},
 			"user_id": {
-				S: &payload.UserId,
+				S: &project.UserId,
+			},
+			"project_id": {
+				S: &project.ProjectId,
 			},
 			"title": {
-				S: &payload.Title,
-			},
-			"description": {
-				S: &payload.Description,
+				S: &js,
 			},
 		},
 	})
