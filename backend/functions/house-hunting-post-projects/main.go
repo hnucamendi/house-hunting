@@ -14,13 +14,15 @@ import (
 var sess = session.Must(session.NewSession())
 
 type HouseNotes struct {
-	NoteId string `json:"id"`
-	Note   string `json:"note"`
+	NoteId    string `json:"id"`
+	NoteTitle string `json:"title"`
+	Note      string `json:"note"`
 }
 
 type HouseScores struct {
-	ScoreId string `json:"id"`
-	Score   int    `json:"score"`
+	ScoreId    string `json:"id"`
+	ScoreTitle string `json:"title"`
+	Score      int    `json:"score"`
 }
 
 type HouseEntry struct {
@@ -38,6 +40,23 @@ type Project struct {
 	HouseEntries []HouseEntry `json:"house_entries"`
 }
 
+func convertHouseEntriesToAttributeValue(entries []HouseEntry) []*dynamodb.AttributeValue {
+	var avs []*dynamodb.AttributeValue
+	for _, entry := range entries {
+		scores, _ := json.Marshal(entry.Scores)
+		notes, _ := json.Marshal(entry.Notes)
+		avs = append(avs, &dynamodb.AttributeValue{
+			M: map[string]*dynamodb.AttributeValue{
+				"id":      {S: aws.String(entry.EntryId)},
+				"address": {S: aws.String(entry.Address)},
+				"scores":  {S: aws.String(string(scores))},
+				"notes":   {S: aws.String(string(notes))},
+			},
+		})
+	}
+	return avs
+}
+
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
 	var project Project
 	err := json.Unmarshal([]byte(event.Body), &project)
@@ -48,8 +67,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
-	j, _ := json.Marshal(project.HouseEntries)
-	js := string(j)
+	entries := convertHouseEntriesToAttributeValue(project.HouseEntries)
 
 	db := dynamodb.New(sess)
 
@@ -63,7 +81,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 				S: &project.ProjectId,
 			},
 			"house_entries": {
-				S: &js,
+				L: entries,
 			},
 		},
 	})
