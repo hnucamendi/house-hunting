@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -20,6 +22,10 @@ type ProjectsRequest struct {
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
 	id := event.PathParameters["id"]
 	project_id := event.PathParameters["project_id"]
+
+	jevent, _ := json.Marshal(event)
+	log.Println(string(jevent))
+	log.Println(event.PathParameters)
 
 	if id == "" || project_id == "" {
 		return &events.APIGatewayV2HTTPResponse{
