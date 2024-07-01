@@ -62,7 +62,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 			"project_id": {
 				S: &project.ProjectId,
 			},
-			"title": {
+			"house_entries": {
 				S: &js,
 			},
 		},
