@@ -69,23 +69,17 @@ func parseJWT(token string) (JWTPayload, error) {
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2CustomAuthorizerSimpleResponse, error) {
 	authBearer, found := strings.CutPrefix(event.Headers["authorization"], "Bearer")
 	if !found {
-		log.Printf("Authorization header malformed %s %v %v\n", event.Headers["authorization"], authBearer, found)
+		log.Printf("Authorization header malformed")
 		return generateDeny(), nil
 	}
-
-	log.Printf("Authorization header: %s\n", authBearer)
 
 	auth := strings.TrimSpace(authBearer)
 
-	fmt.Printf("Authorization header cleaned: %s\n", auth)
-
 	p, err := parseJWT(auth)
 	if err != nil {
-		log.Printf("Failed to parse JWT: %v\n", err)
+		log.Printf("Failed to parse JWT")
 		return generateDeny(), nil
 	}
-
-	fmt.Printf("Parsed JWT: %v\n", p)
 
 	if p.Exp < time.Now().Unix() {
 		log.Println("Token expired")
@@ -96,6 +90,8 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2C
 		log.Println("Email not verified")
 		return generateDeny(), nil
 	}
+
+	log.Printf("user authorized")
 
 	return generateAllow(), nil
 }

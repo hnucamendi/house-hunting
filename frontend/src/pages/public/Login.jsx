@@ -17,7 +17,7 @@ export default function Login() {
       if (session && typeof session.AccessToken != "undefined") {
         sessionStorage.setItem("accessToken", session.AccessToken);
         if (sessionStorage.getItem("accessToken")) {
-          window.location.href = "/home";
+          window.location.href = "/projects";
         } else {
           console.error("Session Token was not set properly");
         }
