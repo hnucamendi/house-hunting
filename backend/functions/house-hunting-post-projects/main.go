@@ -56,7 +56,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 	out, err := db.PutItem(&dynamodb.PutItemInput{
 		TableName: aws.String("UsersTable"),
 		Item: map[string]*dynamodb.AttributeValue{
-			"user_id": {
+			"id": {
 				S: &project.UserId,
 			},
 			"project_id": {
