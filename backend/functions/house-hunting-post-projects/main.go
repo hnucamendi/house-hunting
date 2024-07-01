@@ -13,6 +13,11 @@ import (
 
 var sess = session.Must(session.NewSession())
 
+type HouseNotes struct {
+	NoteId string `json:"note_id"`
+	Note   string `json:"note"`
+}
+
 type HouseScores struct {
 	ScoreId string `json:"score_id"`
 	Score   int    `json:"score"`
@@ -22,7 +27,7 @@ type HouseEntry struct {
 	EntryId string        `json:"entry_id"`
 	Address string        `json:"address"`
 	Scores  []HouseScores `json:"scores"`
-	Notes   string        `json:"notes"`
+	Notes   []HouseNotes  `json:"notes"`
 }
 
 type Project struct {
