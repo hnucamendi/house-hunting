@@ -14,13 +14,13 @@ import (
 var sess = session.Must(session.NewSession())
 
 type ProjectsRequest struct {
-	UserId    string `json:"user_id"`
+	UserId    string `json:"id"`
 	ProjectId string `json:"project_id"`
 }
 
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
-	var payload ProjectsRequest
-	err := json.Unmarshal([]byte(event.Body), &payload)
+	var request ProjectsRequest
+	err := json.Unmarshal([]byte(event.Body), &request)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 400,
@@ -34,17 +34,17 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		TableName: aws.String("UsersTable"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"id": {
-				S: &payload.ProjectId,
+				S: &request.UserId,
 			},
 			"project_id": {
-				S: &payload.UserId,
+				S: &request.ProjectId,
 			},
 		},
 	})
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
-			Body:       fmt.Sprintf("Failed to get item: %v", err),
+			Body:       fmt.Sprintf("Failed to get item: %v\t%s %s\n", err, request.ProjectId, request.UserId),
 		}, nil
 	}
 
