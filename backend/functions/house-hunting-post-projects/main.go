@@ -14,15 +14,15 @@ import (
 var sess = session.Must(session.NewSession())
 
 type HouseNotes struct {
-	NoteId    string `json:"id"`
-	NoteTitle string `json:"title"`
-	Note      string `json:"note"`
+	NoteId string `json:"id"`
+	Title  string `json:"title"`
+	Note   string `json:"note"`
 }
 
 type HouseScores struct {
-	ScoreId    string `json:"id"`
-	ScoreTitle string `json:"title"`
-	Score      int    `json:"score"`
+	ScoreId string `json:"id"`
+	Title   string `json:"title"`
+	Score   int    `json:"score"`
 }
 
 type HouseEntry struct {
@@ -43,14 +43,34 @@ type Project struct {
 func convertHouseEntriesToAttributeValue(entries []HouseEntry) []*dynamodb.AttributeValue {
 	var avs []*dynamodb.AttributeValue
 	for _, entry := range entries {
-		scores, _ := json.Marshal(entry.Scores)
-		notes, _ := json.Marshal(entry.Notes)
+		scoresAttr := make([]*dynamodb.AttributeValue, len(entry.Scores))
+		for i, score := range entry.Scores {
+			scoresAttr[i] = &dynamodb.AttributeValue{
+				M: map[string]*dynamodb.AttributeValue{
+					"id":    {S: aws.String(score.ScoreId)},
+					"title": {S: aws.String(score.Title)},
+					"score": {N: aws.String(fmt.Sprintf("%d", score.Score))},
+				},
+			}
+		}
+
+		notesAttr := make([]*dynamodb.AttributeValue, len(entry.Notes))
+		for i, note := range entry.Notes {
+			notesAttr[i] = &dynamodb.AttributeValue{
+				M: map[string]*dynamodb.AttributeValue{
+					"id":    {S: aws.String(note.NoteId)},
+					"title": {S: aws.String(note.Title)},
+					"note":  {S: aws.String(note.Note)},
+				},
+			}
+		}
+
 		avs = append(avs, &dynamodb.AttributeValue{
 			M: map[string]*dynamodb.AttributeValue{
 				"id":      {S: aws.String(entry.EntryId)},
 				"address": {S: aws.String(entry.Address)},
-				"scores":  {S: aws.String(string(scores))},
-				"notes":   {S: aws.String(string(notes))},
+				"scores":  {L: scoresAttr},
+				"notes":   {L: notesAttr},
 			},
 		})
 	}
