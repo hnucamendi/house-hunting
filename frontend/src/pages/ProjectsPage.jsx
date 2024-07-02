@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-// import Project from '../components/Project';
+import Project from '../components/Project';
 import "../styles/pages/projectsPage.css";
 
 
@@ -21,19 +21,27 @@ const LandingPage = () => {
       }
     })
       .then((response) => response.json())
-      .then((data) => console.log({data}));
+      .then((data) => setProjects(data));
   }, [url])
 
+  console.log(Object.keys(projects), projects.house_entries)
   return (
     <div className="projects-page">
       <h1>Your Projects</h1>
-      {/* {projects.map((project) => (
+      {projects.house_entries.map((project) => (
         <Project key={project.id}>
-          <h2>{project.title}</h2>
-          <p>{project.description}</p>
+          <h2>{project.address}</h2>
+          <div>
+            <h3>{project.notes.title}</h3>
+            <p>{project.notes.note}</p>
+          </div>
+          <div>
+            <h3>{project.scores.title}</h3>
+            <p>{project.scores.score}</p>
+          </div>
           <button>Select</button>
         </Project>
-      ))} */}
+      ))}
     </div>
   );
 };
