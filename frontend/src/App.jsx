@@ -5,12 +5,12 @@ import Confirm from "./pages/public/Confirm.jsx";
 import './index.css';
 
 const App = () => {
-    const isAuthenticated = () => {
+  const isAuthenticated = () => {
     const accessToken = sessionStorage.getItem("accessToken");
     return !!accessToken;
   };
-  
-    return (
+
+  return (
     <BrowserRouter>
       <Routes>
         <Route
