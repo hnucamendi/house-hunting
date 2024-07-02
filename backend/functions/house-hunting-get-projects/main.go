@@ -87,15 +87,13 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
-	fmt.Println(out.String(), out.GoString())
-
 	var dynamoResponse map[string]*dynamodb.AttributeValue
 	err = json.Unmarshal([]byte(out.String()), &dynamoResponse)
 	if err != nil {
 		fmt.Println("Error unmarshaling dynamo JSON:", err)
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
-			Body:       fmt.Sprintf("Failed to unmarshal dynamo JSON: %v", err),
+			Body:       fmt.Sprintf("Failed to unmarshal dynamo JSON: %v\n%s\n%s\n", err, out.GoString(), out.String()),
 		}, nil
 	}
 
