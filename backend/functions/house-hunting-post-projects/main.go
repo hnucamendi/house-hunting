@@ -140,7 +140,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 
 	return &events.APIGatewayV2HTTPResponse{
 		StatusCode: 200,
-		Body:       out.GoString(),
+		Body:       "Success",
 	}, nil
 
 }
