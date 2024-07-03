@@ -26,7 +26,7 @@ export default function Confirm() {
       <form onSubmit={handleSubmit}>
         <div>
           <input
-            className="inputText"
+            className="form-control"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -36,7 +36,7 @@ export default function Confirm() {
         </div>
         <div>
           <input
-            className="inputText"
+            className="form-control"
             type="text"
             value={confirmationCode}
             onChange={(e) => setConfirmationCode(e.target.value)}
