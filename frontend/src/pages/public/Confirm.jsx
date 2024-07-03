@@ -21,31 +21,33 @@ export default function Confirm() {
     }
   };
   return (
-    <div className="loginForm">
-      <h2>Confirm Account</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <input
-            className="form-control"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            required
-          />
-        </div>
-        <div>
-          <input
-            className="form-control"
-            type="text"
-            value={confirmationCode}
-            onChange={(e) => setConfirmationCode(e.target.value)}
-            placeholder="Confirmation Code"
-            required
-          />
-        </div>
-        <button type="submit">Confirm Account</button>
-      </form>
+    <div className="parent">
+      <div className="container" style={{ width: "30%" }}>
+        <h2 className="m-2">Confirm Account</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="m-2">
+            <input
+              className="form-control"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Email"
+              required
+            />
+          </div>
+          <div className="m-2">
+            <input
+              className="form-control"
+              type="text"
+              value={confirmationCode}
+              onChange={(e) => setConfirmationCode(e.target.value)}
+              placeholder="Confirmation Code"
+              required
+            />
+          </div>
+          <button className="btn btn-primary m-2" type="submit">Confirm Account</button>
+        </form>
+      </div>
     </div>
   );
 }
