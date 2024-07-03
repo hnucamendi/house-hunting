@@ -38,7 +38,7 @@ export default function CreateProjectModal({ hideModal, handleCreateProject }) {
             <label htmlFor="projectTitle">Title</label>
             <input
               id="projectTitle"
-              className="inputText"
+              class="form-control"
               type="text"
               value={formData.projectTitle}
               onChange={handleChange}
@@ -49,7 +49,7 @@ export default function CreateProjectModal({ hideModal, handleCreateProject }) {
             <label htmlFor="projectDescription">Description</label>
             <textarea
               id="projectDescription"
-              className="inputText"
+              class="form-control"
               type="text"
               value={formData.projectDescription}
               onChange={handleChange}
@@ -64,7 +64,7 @@ export default function CreateProjectModal({ hideModal, handleCreateProject }) {
             <label htmlFor="projectCriteriaName">Item name</label>
             <input
               id="projectCriteriaName"
-              className="inputText"
+              class="form-control"
               type="text"
               value={formData.projectCriteriaName}
               onChange={handleChange}
@@ -73,7 +73,7 @@ export default function CreateProjectModal({ hideModal, handleCreateProject }) {
             <label htmlFor="projectCriteriaValue">Item Value</label>
             <input
               id="projectCriteriaValue"
-              className="inputText"
+              class="form-control"
               type="text"
               value={formData.projectCriteriaValue}
               onChange={handleChange}
