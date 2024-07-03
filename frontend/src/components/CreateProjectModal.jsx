@@ -29,7 +29,7 @@ export default function CreateProjectModal({ hideModal, handleCreateProject }) {
   }
 
   return (
-    < div hidden={hideModal} className="modal" >
+    <div hidden={hideModal} className="modal" >
       <h1>Test</h1>
       <form>
         <h2>Project Details</h2>
