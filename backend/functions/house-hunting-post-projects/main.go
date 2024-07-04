@@ -14,21 +14,21 @@ import (
 var sess = session.Must(session.NewSession())
 
 type HouseNotes struct {
-	NoteId string `json:"id"`
-	Title  string `json:"title"`
-	Note   string `json:"note"`
+	Id    string `json:"id"`
+	Title string `json:"title"`
+	Note  string `json:"note"`
 }
 
 type HouseScores struct {
-	ScoreId string `json:"id"`
-	Title   string `json:"title"`
-	Score   int    `json:"score"`
+	Id         string `json:"id"`
+	Score      int    `json:"score"`
+	CriteriaId string `json:"criteriaId"`
 }
 
 type Criteria struct {
-	CriteriaId string `json:"id"`
-	Key        string `json:"key"`
-	Value      string `json:"value"`
+	Id    string `json:"id"`
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
 type HouseEntry struct {
@@ -54,9 +54,9 @@ func convertHouseEntriesToAttributeValue(entries []HouseEntry) []*dynamodb.Attri
 		for i, score := range entry.Scores {
 			scoresAttr[i] = &dynamodb.AttributeValue{
 				M: map[string]*dynamodb.AttributeValue{
-					"id":    {S: aws.String(score.ScoreId)},
-					"title": {S: aws.String(score.Title)},
-					"score": {N: aws.String(fmt.Sprintf("%d", score.Score))},
+					"id":         {S: aws.String(score.Id)},
+					"score":      {N: aws.String(fmt.Sprintf("%d", score.Score))},
+					"criteriaId": {S: aws.String(score.CriteriaId)},
 				},
 			}
 		}
@@ -65,7 +65,7 @@ func convertHouseEntriesToAttributeValue(entries []HouseEntry) []*dynamodb.Attri
 		for i, note := range entry.Notes {
 			notesAttr[i] = &dynamodb.AttributeValue{
 				M: map[string]*dynamodb.AttributeValue{
-					"id":    {S: aws.String(note.NoteId)},
+					"id":    {S: aws.String(note.Id)},
 					"title": {S: aws.String(note.Title)},
 					"note":  {S: aws.String(note.Note)},
 				},
@@ -90,9 +90,10 @@ func convertCriteriaToAttributeValue(criteria []map[string]map[string]string) []
 		for key, value := range c {
 			avs = append(avs, &dynamodb.AttributeValue{
 				M: map[string]*dynamodb.AttributeValue{
-					"id":    {S: aws.String(value["id"])},
-					"key":   {S: aws.String(key)},
-					"value": {S: aws.String(value["value"])},
+					"id":           {S: aws.String(value["id"])},
+					"key":          {S: aws.String(key)},
+					"value":        {S: aws.String(value["value"])},
+					"houseEntryId": {S: aws.String(value["houseEntryId"])},
 				},
 			})
 		}
