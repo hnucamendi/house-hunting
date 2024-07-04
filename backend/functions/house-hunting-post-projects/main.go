@@ -90,10 +90,9 @@ func convertCriteriaToAttributeValue(criteria []map[string]map[string]string) []
 		for key, value := range c {
 			avs = append(avs, &dynamodb.AttributeValue{
 				M: map[string]*dynamodb.AttributeValue{
-					"id":           {S: aws.String(value["id"])},
-					"key":          {S: aws.String(key)},
-					"value":        {S: aws.String(value["value"])},
-					"houseEntryId": {S: aws.String(value["houseEntryId"])},
+					"id":    {S: aws.String(value["id"])},
+					"key":   {S: aws.String(key)},
+					"value": {S: aws.String(value["value"])},
 				},
 			})
 		}
