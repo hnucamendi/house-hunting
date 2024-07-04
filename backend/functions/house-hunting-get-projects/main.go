@@ -129,12 +129,14 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
+	fmt.Println("Got item:", out.Item)
+
 	var project []Project
 	err = dynamodbattribute.UnmarshalMap(out.Item, &project)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
-			Body:       fmt.Sprintf("Failed to unmarshal item: %v\n", err),
+			Body:       fmt.Sprintf("Failed to unmarshal item: %v\n%v\n", err, out.Item),
 		}, nil
 	}
 
