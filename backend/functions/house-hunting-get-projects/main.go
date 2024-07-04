@@ -129,7 +129,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
-	var project Project
+	var project []Project
 	err = dynamodbattribute.UnmarshalMap(out.Item, &project)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
