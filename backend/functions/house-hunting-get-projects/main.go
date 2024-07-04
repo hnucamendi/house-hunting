@@ -9,9 +9,44 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
 var sess = session.Must(session.NewSession())
+
+type HouseNotes struct {
+	Id    string `json:"id"`
+	Title string `json:"title"`
+	Note  string `json:"note"`
+}
+
+type HouseScores struct {
+	Id         string `json:"id"`
+	Score      int    `json:"score"`
+	CriteriaId string `json:"criteriaId"`
+}
+
+type Criteria struct {
+	Id    string `json:"id"`
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+type HouseEntry struct {
+	EntryId string        `json:"id"`
+	Address string        `json:"address"`
+	Scores  []HouseScores `json:"scores"`
+	Notes   []HouseNotes  `json:"notes"`
+}
+
+type Project struct {
+	UserId       string                         `json:"id"`
+	ProjectId    string                         `json:"projectId"`
+	Title        string                         `json:"title"`
+	Description  string                         `json:"description"`
+	Criteria     []map[string]map[string]string `json:"criteria"`
+	HouseEntries []HouseEntry                   `json:"houseEntries"`
+}
 
 type ProjectsRequest struct {
 	UserId    string `json:"id"`
@@ -83,13 +118,27 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
-			Body:       fmt.Sprintf("Failed to get item: %v\t%s %s\n", err, id, project_id),
+			Body:       fmt.Sprintf("Failed to get item: %v\n", err),
 		}, nil
 	}
 
-	goMap := dynamoMapToGoMap(out.Item)
+	if out.Item == nil {
+		return &events.APIGatewayV2HTTPResponse{
+			StatusCode: 404,
+			Body:       "Item not found",
+		}, nil
+	}
 
-	normalJson, err := json.MarshalIndent(goMap, "", "  ")
+	var project Project
+	err = dynamodbattribute.UnmarshalMap(out.Item, &project)
+	if err != nil {
+		return &events.APIGatewayV2HTTPResponse{
+			StatusCode: 500,
+			Body:       fmt.Sprintf("Failed to unmarshal item: %v\n", err),
+		}, nil
+	}
+
+	normalJson, err := json.MarshalIndent(project, "", "  ")
 	if err != nil {
 		fmt.Println("Error marshaling to JSON:", err)
 		return &events.APIGatewayV2HTTPResponse{
