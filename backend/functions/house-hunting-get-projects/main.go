@@ -40,12 +40,12 @@ type HouseEntry struct {
 }
 
 type Project struct {
-	UserId       string                         `json:"id"`
-	ProjectId    string                         `json:"projectId"`
-	Title        string                         `json:"title"`
-	Description  string                         `json:"description"`
-	Criteria     []map[string]map[string]string `json:"criteria"`
-	HouseEntries []HouseEntry                   `json:"houseEntries"`
+	UserId       string       `json:"id"`
+	ProjectId    string       `json:"projectId"`
+	Title        string       `json:"title"`
+	Description  string       `json:"description"`
+	Criteria     []Criteria   `json:"criteria"`
+	HouseEntries []HouseEntry `json:"houseEntries"`
 }
 
 type ProjectsRequest struct {
@@ -131,7 +131,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 
 	fmt.Println("Got item:", out.Item)
 
-	var project []Project
+	var project Project
 	err = dynamodbattribute.UnmarshalMap(out.Item, &project)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
