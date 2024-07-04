@@ -53,52 +53,52 @@ type ProjectsRequest struct {
 	ProjectId string `json:"project_id"`
 }
 
-func dynamoToGo(value *dynamodb.AttributeValue) interface{} {
-	if value.S != nil {
-		return *value.S
-	}
-	if value.N != nil {
-		return *value.N
-	}
-	if value.BOOL != nil {
-		return *value.BOOL
-	}
-	if value.M != nil {
-		m := make(map[string]interface{})
-		for k, v := range value.M {
-			m[k] = dynamoToGo(v)
-		}
-		return m
-	}
-	if value.L != nil {
-		l := make([]interface{}, len(value.L))
-		for i, v := range value.L {
-			l[i] = dynamoToGo(v)
-		}
-		return l
-	}
-	if value.NULL != nil && *value.NULL {
-		return nil
-	}
-	return nil
-}
+// func dynamoToGo(value *dynamodb.AttributeValue) interface{} {
+// 	if value.S != nil {
+// 		return *value.S
+// 	}
+// 	if value.N != nil {
+// 		return *value.N
+// 	}
+// 	if value.BOOL != nil {
+// 		return *value.BOOL
+// 	}
+// 	if value.M != nil {
+// 		m := make(map[string]interface{})
+// 		for k, v := range value.M {
+// 			m[k] = dynamoToGo(v)
+// 		}
+// 		return m
+// 	}
+// 	if value.L != nil {
+// 		l := make([]interface{}, len(value.L))
+// 		for i, v := range value.L {
+// 			l[i] = dynamoToGo(v)
+// 		}
+// 		return l
+// 	}
+// 	if value.NULL != nil && *value.NULL {
+// 		return nil
+// 	}
+// 	return nil
+// }
 
-func dynamoMapToGoMap(item map[string]*dynamodb.AttributeValue) map[string]interface{} {
-	m := make(map[string]interface{})
-	for k, v := range item {
-		m[k] = dynamoToGo(v)
-	}
-	return m
-}
+// func dynamoMapToGoMap(item map[string]*dynamodb.AttributeValue) map[string]interface{} {
+// 	m := make(map[string]interface{})
+// 	for k, v := range item {
+// 		m[k] = dynamoToGo(v)
+// 	}
+// 	return m
+// }
 
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
 	id := event.QueryStringParameters["id"]
-	project_id := event.QueryStringParameters["project_id"]
+	projectId := event.QueryStringParameters["projectId"]
 
-	if id == "" || project_id == "" {
+	if id == "" || projectId == "" {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 400,
-			Body:       "Missing id or project_id",
+			Body:       "Missing id or projectId",
 		}, nil
 	}
 
@@ -110,8 +110,8 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 			"id": {
 				S: &id,
 			},
-			"project_id": {
-				S: &project_id,
+			"projectId": {
+				S: &projectId,
 			},
 		},
 	})
