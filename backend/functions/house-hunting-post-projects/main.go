@@ -15,6 +15,17 @@ import (
 
 var sess = session.Must(session.NewSession())
 
+type IDType string
+
+const (
+	USERID     IDType = "ID"
+	PROJECTID  IDType = "PROJECTID"
+	CategoryID IDType = "CATEGORYID"
+	EntryID    IDType = "ENTRYID"
+	NoteID     IDType = "NOTEID"
+	ScoreID    IDType = "SCOREID"
+)
+
 type HouseNotes struct {
 	Id    string `json:"id"`
 	Title string `json:"title"`
@@ -39,7 +50,7 @@ type Category struct {
 }
 
 type HouseEntry struct {
-	EntryId string        `json:"id"`
+	Id      string        `json:"id"`
 	Address string        `json:"address"`
 	Scores  []HouseScores `json:"scores"`
 	Notes   []HouseNotes  `json:"notes"`
@@ -54,7 +65,7 @@ type Project struct {
 	HouseEntries []HouseEntry `json:"houseEntries"`
 }
 
-func (p *Project) generateId(pre string) string {
+func (p *Project) generateId(pre IDType) string {
 	b := []byte(fmt.Sprintf("%s::%s::%s", pre, p.UserId, p.ProjectId))
 	return fmt.Sprintf("%x", md5.Sum(b))
 }
@@ -69,8 +80,22 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
-	project.UserId = project.generateId("ID")
-	project.ProjectId = project.generateId("PROJECTID")
+	project.UserId = project.generateId(USERID)
+	project.ProjectId = project.generateId(PROJECTID)
+
+	for i := range project.Categories {
+		project.Categories[i].Id = project.generateId(CategoryID)
+	}
+
+	for i := range project.HouseEntries {
+		project.HouseEntries[i].Id = project.generateId(EntryID)
+		for j := range project.HouseEntries[i].Scores {
+			project.HouseEntries[i].Scores[j].Id = project.generateId(ScoreID)
+		}
+		for j := range project.HouseEntries[i].Notes {
+			project.HouseEntries[i].Notes[j].Id = project.generateId(NoteID)
+		}
+	}
 
 	p, err := dynamodbattribute.Marshal(project)
 	if err != nil {
