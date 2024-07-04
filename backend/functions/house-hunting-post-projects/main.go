@@ -67,7 +67,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
-			Body:       fmt.Sprintf("Failed to marshal house entries: %v\n%v\n", err, p),
+			Body:       fmt.Sprintf("Failed to marshal house entries: %v\n", err),
 		}, nil
 	}
 
