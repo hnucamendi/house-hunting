@@ -27,9 +27,14 @@ type HouseScores struct {
 }
 
 type Criteria struct {
-	Id    string `json:"id"`
 	Key   string `json:"key"`
 	Value string `json:"value"`
+}
+
+type Category struct {
+	Id       string     `json:"id"`
+	Category string     `json:"category"`
+	Criteria []Criteria `json:"criteria"`
 }
 
 type HouseEntry struct {
@@ -44,7 +49,7 @@ type Project struct {
 	ProjectId    string       `json:"projectId"`
 	Title        string       `json:"title"`
 	Description  string       `json:"description"`
-	Criteria     []Criteria   `json:"criteria"`
+	Categories   []Category   `json:"catagories"`
 	HouseEntries []HouseEntry `json:"houseEntries"`
 }
 
