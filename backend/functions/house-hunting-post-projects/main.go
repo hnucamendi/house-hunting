@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/md5"
 	"encoding/json"
 	"fmt"
 
@@ -53,6 +54,11 @@ type Project struct {
 	HouseEntries []HouseEntry `json:"houseEntries"`
 }
 
+func (p *Project) generateId(pre string) string {
+	b := []byte(fmt.Sprintf("%s::%s::%s", pre, p.UserId, p.ProjectId))
+	return fmt.Sprintf("%x", md5.Sum(b))
+}
+
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
 	var project Project
 	err := json.Unmarshal([]byte(event.Body), &project)
@@ -63,6 +69,9 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
+	project.UserId = project.generateId("ID")
+	project.ProjectId = project.generateId("PROJECTID")
+
 	p, err := dynamodbattribute.Marshal(project)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
@@ -70,8 +79,6 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 			Body:       fmt.Sprintf("Failed to marshal house entries: %v\n", err),
 		}, nil
 	}
-
-	fmt.Println(p)
 
 	db := dynamodb.New(sess)
 
