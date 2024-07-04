@@ -84,18 +84,16 @@ func convertHouseEntriesToAttributeValue(entries []HouseEntry) []*dynamodb.Attri
 	return avs
 }
 
-func convertCriteriaToAttributeValue(criteria []map[string]map[string]string) []*dynamodb.AttributeValue {
+func convertCriteriaToAttributeValue(criteria []Criteria) []*dynamodb.AttributeValue {
 	var avs []*dynamodb.AttributeValue
 	for _, c := range criteria {
-		for key, value := range c {
-			avs = append(avs, &dynamodb.AttributeValue{
-				M: map[string]*dynamodb.AttributeValue{
-					"id":    {S: aws.String(value["id"])},
-					"key":   {S: aws.String(key)},
-					"value": {S: aws.String(value["value"])},
-				},
-			})
-		}
+		avs = append(avs, &dynamodb.AttributeValue{
+			M: map[string]*dynamodb.AttributeValue{
+				"id":    {S: aws.String(c.Id)},
+				"key":   {S: aws.String(c.Key)},
+				"value": {S: aws.String(c.Value)},
+			},
+		})
 	}
 	return avs
 }
