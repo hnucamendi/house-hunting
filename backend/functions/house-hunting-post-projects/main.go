@@ -25,7 +25,7 @@ type HouseScores struct {
 	Score   int    `json:"score"`
 }
 
-type ProjectCriteria struct {
+type Criteria struct {
 	CriteriaId string `json:"id"`
 	Key        string `json:"key"`
 	Value      string `json:"value"`
@@ -39,12 +39,12 @@ type HouseEntry struct {
 }
 
 type Project struct {
-	UserId          string              `json:"id"`
-	ProjectId       string              `json:"projectId"`
-	Title           string              `json:"title"`
-	Description     string              `json:"description"`
-	ProjectCriteria []map[string]string `json:"projectCriteria"`
-	HouseEntries    []HouseEntry        `json:"houseEntries"`
+	UserId       string                         `json:"id"`
+	ProjectId    string                         `json:"projectId"`
+	Title        string                         `json:"title"`
+	Description  string                         `json:"description"`
+	Criteria     []map[string]map[string]string `json:"criteria"`
+	HouseEntries []HouseEntry                   `json:"houseEntries"`
 }
 
 func convertHouseEntriesToAttributeValue(entries []HouseEntry) []*dynamodb.AttributeValue {
@@ -84,14 +84,15 @@ func convertHouseEntriesToAttributeValue(entries []HouseEntry) []*dynamodb.Attri
 	return avs
 }
 
-func convertProjectCriteriaToAttributeValue(criteria []map[string]string) []*dynamodb.AttributeValue {
+func convertCriteriaToAttributeValue(criteria []map[string]map[string]string) []*dynamodb.AttributeValue {
 	var avs []*dynamodb.AttributeValue
 	for _, c := range criteria {
-		for k, v := range c {
+		for key, value := range c {
 			avs = append(avs, &dynamodb.AttributeValue{
 				M: map[string]*dynamodb.AttributeValue{
-					"key":   {S: aws.String(k)},
-					"value": {S: aws.String(v)},
+					"id":    {S: aws.String(value["id"])},
+					"key":   {S: aws.String(key)},
+					"value": {S: aws.String(value["value"])},
 				},
 			})
 		}
@@ -110,7 +111,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 	}
 
 	he := convertHouseEntriesToAttributeValue(project.HouseEntries)
-	pc := convertProjectCriteriaToAttributeValue(project.ProjectCriteria)
+	c := convertCriteriaToAttributeValue(project.Criteria)
 
 	db := dynamodb.New(sess)
 
@@ -126,8 +127,8 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 			"houseEntries": {
 				L: he,
 			},
-			"projectCriteria": {
-				L: pc,
+			"criteria": {
+				L: c,
 			},
 		},
 	})
