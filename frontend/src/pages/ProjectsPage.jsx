@@ -32,41 +32,14 @@ const LandingPage = () => {
   const handleHide = () => setHideCreateProject(true)
 
   const handleCreateProject = (e) => {
-    // {
-    //   "projectTitle": "testTitle",
-    //     "projectDescription": "testDescription",
-    //       "projectCategories": [
-    //         {
-    //           "category": "TestCrit",
-    //           "criteria": [
-    //             {
-    //               "title": "TestItem",
-    //               "value": "testValue"
-    //             },
-    //             {
-    //               "title": "TestItem2",
-    //               "value": "TestValue2"
-    //             }
-    //           ]
-    //         },
-    //         {
-    //           "category": "TestTitle2",
-    //           "criteria": [
-    //             {
-    //               "title": "JsetITem2",
-    //               "value": "JestItem2"
-    //             }
-    //           ]
-    //         }
-    //       ]
-    // }
     try {
       fetch('https://api.hnucamendi.net/projects', {
         method: "POST",
         body: JSON.stringify({
           title: e.projectTitle,
           description: e.projectDescription,
-          criteria: e.projectCategories
+          catagories: e.projectCategories,
+          houseEntries: [],
         }),
         headers: {
           Accept: 'application/json',
@@ -74,7 +47,7 @@ const LandingPage = () => {
         }
       })
 
-      // setUploadProjectCount(uploadProjectCount + 1)
+      setUploadProjectCount(uploadProjectCount + 1)
     } catch (error) {
       console.error(`Error creating project: ${error}`)
     }
