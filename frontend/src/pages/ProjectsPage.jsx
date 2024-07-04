@@ -17,28 +17,56 @@ const LandingPage = () => {
   }, []);
 
   useEffect(() => {
-    fetch(url.toString(), {
-      method: "GET",
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Bearer ${sessionStorage.getItem('idToken')}`
-      }
-    })
-      .then((response) => response.json())
-      .then((data) => setProjects(data));
+    // fetch(url.toString(), {
+    //   method: "GET",
+    //   headers: {
+    //     Accept: 'application/json',
+    //     Authorization: `Bearer ${sessionStorage.getItem('idToken')}`
+    //   }
+    // })
+    //   .then((response) => response.json())
+    //   .then((data) => setProjects(data));
   }, [url, uploadProjectCount])
 
+  const handleShow = () => setHideCreateProject(false)
+  const handleHide = () => setHideCreateProject(true)
+
   const handleCreateProject = (e) => {
+    // {
+    //   "projectTitle": "testTitle",
+    //     "projectDescription": "testDescription",
+    //       "projectCategories": [
+    //         {
+    //           "category": "TestCrit",
+    //           "criteria": [
+    //             {
+    //               "title": "TestItem",
+    //               "value": "testValue"
+    //             },
+    //             {
+    //               "title": "TestItem2",
+    //               "value": "TestValue2"
+    //             }
+    //           ]
+    //         },
+    //         {
+    //           "category": "TestTitle2",
+    //           "criteria": [
+    //             {
+    //               "title": "JsetITem2",
+    //               "value": "JestItem2"
+    //             }
+    //           ]
+    //         }
+    //       ]
+    // }
     try {
-      console.log('Form submitted:', e);
       fetch('https://api.hnucamendi.net/projects', {
         method: "POST",
         body: JSON.stringify({
-          id: "user1234",
-          project_id: "project1234",
           title: e.projectTitle,
           description: e.projectDescription,
-          criteria: e.projectCriteria
+          criteria: e.projectCategories
         }),
         headers: {
           Accept: 'application/json',
@@ -78,10 +106,18 @@ const LandingPage = () => {
     return (
       <div className="projects-page">
         <h1>Uh Oh ... You dont have any projects yet!</h1>
-        <button onClick={() => setHideCreateProject(!hideCreateProject)}>
+        <button onClick={() => setHideCreateProject(!hideCreateProject)}
+        >
           Create Project
         </button>
-        <CreateProjectModal hideModal={hideCreateProject} handleCreateProject={handleCreateProject} />
+        {
+          hideCreateProject ? null :
+            <CreateProjectModal
+              handleShow={handleShow}
+              handleHide={handleHide}
+              handleCreateProject={handleCreateProject}
+            />
+        }
       </div>
     )
   }

@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 )
 
 var sess = session.Must(session.NewSession())
@@ -26,9 +27,14 @@ type HouseScores struct {
 }
 
 type Criteria struct {
-	Id    string `json:"id"`
 	Key   string `json:"key"`
 	Value string `json:"value"`
+}
+
+type Category struct {
+	Id       string     `json:"id"`
+	Category string     `json:"category"`
+	Criteria []Criteria `json:"criteria"`
 }
 
 type HouseEntry struct {
@@ -43,59 +49,8 @@ type Project struct {
 	ProjectId    string       `json:"projectId"`
 	Title        string       `json:"title"`
 	Description  string       `json:"description"`
-	Criteria     []Criteria   `json:"criteria"`
+	Categories   []Category   `json:"catagories"`
 	HouseEntries []HouseEntry `json:"houseEntries"`
-}
-
-func convertHouseEntriesToAttributeValue(entries []HouseEntry) []*dynamodb.AttributeValue {
-	var avs []*dynamodb.AttributeValue
-	for _, entry := range entries {
-		scoresAttr := make([]*dynamodb.AttributeValue, len(entry.Scores))
-		for i, score := range entry.Scores {
-			scoresAttr[i] = &dynamodb.AttributeValue{
-				M: map[string]*dynamodb.AttributeValue{
-					"id":         {S: aws.String(score.Id)},
-					"score":      {N: aws.String(fmt.Sprintf("%d", score.Score))},
-					"criteriaId": {S: aws.String(score.CriteriaId)},
-				},
-			}
-		}
-
-		notesAttr := make([]*dynamodb.AttributeValue, len(entry.Notes))
-		for i, note := range entry.Notes {
-			notesAttr[i] = &dynamodb.AttributeValue{
-				M: map[string]*dynamodb.AttributeValue{
-					"id":    {S: aws.String(note.Id)},
-					"title": {S: aws.String(note.Title)},
-					"note":  {S: aws.String(note.Note)},
-				},
-			}
-		}
-
-		avs = append(avs, &dynamodb.AttributeValue{
-			M: map[string]*dynamodb.AttributeValue{
-				"id":      {S: aws.String(entry.EntryId)},
-				"address": {S: aws.String(entry.Address)},
-				"scores":  {L: scoresAttr},
-				"notes":   {L: notesAttr},
-			},
-		})
-	}
-	return avs
-}
-
-func convertCriteriaToAttributeValue(criteria []Criteria) []*dynamodb.AttributeValue {
-	var avs []*dynamodb.AttributeValue
-	for _, c := range criteria {
-		avs = append(avs, &dynamodb.AttributeValue{
-			M: map[string]*dynamodb.AttributeValue{
-				"id":    {S: aws.String(c.Id)},
-				"key":   {S: aws.String(c.Key)},
-				"value": {S: aws.String(c.Value)},
-			},
-		})
-	}
-	return avs
 }
 
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
@@ -108,27 +63,21 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
-	he := convertHouseEntriesToAttributeValue(project.HouseEntries)
-	c := convertCriteriaToAttributeValue(project.Criteria)
+	p, err := dynamodbattribute.Marshal(project)
+	if err != nil {
+		return &events.APIGatewayV2HTTPResponse{
+			StatusCode: 500,
+			Body:       fmt.Sprintf("Failed to marshal house entries: %v\n%v\n", err, p),
+		}, nil
+	}
+
+	fmt.Println(p)
 
 	db := dynamodb.New(sess)
 
 	_, err = db.PutItem(&dynamodb.PutItemInput{
 		TableName: aws.String("UsersTable"),
-		Item: map[string]*dynamodb.AttributeValue{
-			"id": {
-				S: &project.UserId,
-			},
-			"projectId": {
-				S: &project.ProjectId,
-			},
-			"houseEntries": {
-				L: he,
-			},
-			"criteria": {
-				L: c,
-			},
-		},
+		Item:      p.M,
 	})
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
