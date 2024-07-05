@@ -30,7 +30,8 @@ const (
 )
 
 type Token struct {
-	Token     JWTPayload
+	Headers map[string]string
+	JWT     JWTPayload
 }
 
 type JWTPayload struct {
@@ -111,22 +112,22 @@ func (jwt Token) parseJWT(token string) error {
 		return fmt.Errorf("failed to decode JWT payload: %v", err)
 	}
 
-	if err := json.Unmarshal(payloadBytes, &jwt.Token); err != nil {
+	if err := json.Unmarshal(payloadBytes, &jwt.JWT); err != nil {
 		return fmt.Errorf("failed to unmarshal JWT payload: %v", err)
 	}
 
 	return nil
 }
 
-func processJWT(header map[string]string) string {
-	authBearer, found := strings.CutPrefix(header["authorization"], "Bearer")
+func (jwt Token) processJWT() string {
+	authBearer, found := strings.CutPrefix(jwt.Headers["authorization"], "Bearer")
 	if !found {
 		log.Printf("Authorization header malformed")
 	}
 
 	auth := strings.TrimSpace(authBearer)
 
-	err := parseJWT(auth)
+	err := jwt.parseJWT(auth)
 	if err != nil {
 		log.Printf("Failed to parse JWT")
 	}
@@ -140,7 +141,12 @@ func generateId(pre IDType, key string) string {
 }
 
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
- email := processJWT(event.Headers)
+	token := &Token{
+		event.Headers,
+		JWTPayload{},
+	}
+
+	email := token.processJWT()
 	fmt.Println("Email:", email)
 
 	id := generateId(USERID, email)
