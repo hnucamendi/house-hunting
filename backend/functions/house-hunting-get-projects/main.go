@@ -106,7 +106,7 @@ func (jwt Token) parseJWT(token string) error {
 	return nil
 }
 
-func processJWT(header) string {
+func processJWT(header map[string]string) string {
 	authBearer, found := strings.CutPrefix(header["authorization"], "Bearer")
 	if !found {
 		log.Printf("Authorization header malformed")
