@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/md5"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -16,6 +17,17 @@ import (
 )
 
 var sess = session.Must(session.NewSession())
+
+type IDType string
+
+const (
+	USERID     IDType = "ID"
+	PROJECTID  IDType = "PROJECTID"
+	CategoryID IDType = "CATEGORYID"
+	EntryID    IDType = "ENTRYID"
+	NoteID     IDType = "NOTEID"
+	ScoreID    IDType = "SCOREID"
+)
 
 type Token struct {
 	Token     JWTPayload
@@ -68,8 +80,8 @@ type HouseEntry struct {
 }
 
 type Project struct {
-	UserId       string       `json:"id"`
-	ProjectId    string       `json:"projectId"`
+	Id           string       `json:"id"`
+	UserId       string       `json:"userId"`
 	Title        string       `json:"title"`
 	Description  string       `json:"description"`
 	Categories   []Category   `json:"catagories"`
@@ -122,20 +134,16 @@ func processJWT(header map[string]string) string {
 	return jwt.JWT.Email
 }
 
+func generateId(pre IDType, key string) string {
+	b := []byte(fmt.Sprintf("%s::%s", pre, key))
+	return fmt.Sprintf("%x", md5.Sum(b))
+}
+
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
  email := processJWT(event.Headers)
 	fmt.Println("Email:", email)
 
-	id := event.QueryStringParameters["id"]
-	projectId := event.QueryStringParameters["projectId"]
-
-	if id == "" || projectId == "" {
-		return &events.APIGatewayV2HTTPResponse{
-			StatusCode: 400,
-			Body:       "Missing id or projectId",
-		}, nil
-	}
-
+	id := generateId(USERID, email)
 	db := dynamodb.New(sess)
 
 	out, err := db.GetItem(&dynamodb.GetItemInput{
@@ -143,9 +151,6 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		Key: map[string]*dynamodb.AttributeValue{
 			"id": {
 				S: &id,
-			},
-			"projectId": {
-				S: &projectId,
 			},
 		},
 	})
@@ -162,8 +167,6 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 			Body:       "Item not found",
 		}, nil
 	}
-
-	fmt.Println("Got item:", out.Item)
 
 	var project Project
 	err = dynamodbattribute.UnmarshalMap(out.Item, &project)
@@ -187,7 +190,6 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		StatusCode: 200,
 		Body:       string(normalJson),
 	}, nil
-
 }
 
 func main() {
