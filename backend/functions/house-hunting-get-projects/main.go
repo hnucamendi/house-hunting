@@ -120,6 +120,7 @@ func (jwt Token) parseJWT(token string) error {
 }
 
 func (jwt Token) processJWT() string {
+	fmt.Println("TAMO", jwt.Headers)
 	authBearer, found := strings.CutPrefix(jwt.Headers["authorization"], "Bearer")
 	if !found {
 		log.Printf("Authorization header malformed")
