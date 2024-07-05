@@ -7,7 +7,12 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
   const [formData, setFormData] = useState({
     projectTitle: '',
     projectDescription: '',
-    projectCategories: [{ category: '', criteria: [{ title: '', value: '' }] }]
+    projectCriteria: [
+      {
+        category: '',
+        details: {},
+      }
+    ]
   });
 
   // const handleChange = (e) => {
@@ -27,35 +32,43 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
   //   }));
   // }
 
-  const handleChange = (e, catIndex, critIndex, field) => {
-    const { name, value } = e.target;
+  const handleChange = (e, catIndex, critIndex, field, type) => {
+    const { value } = e.target;
     const updatedFormData = { ...formData };
 
-    if (field === 'projectTitle' || field === 'projectDescription') {
-      updatedFormData[field] = value;
-    } else if (field === 'category') {
-      updatedFormData.projectCategories[catIndex][name] = value;
-    } else if (field === 'criteria') {
-      updatedFormData.projectCategories[catIndex].criteria[critIndex][name] = value;
+    if (type === 'projectTitle' || type === 'projectDescription') {
+      updatedFormData[type] = value;
+    } else if (type === 'category') {
+      updatedFormData.projectCriteria[catIndex].category = value;
+    } else if (type === 'criteriaKey') {
+      const oldKey = Object.keys(updatedFormData.projectCriteria[catIndex].details)[critIndex];
+      const updatedCriteria = { ...updatedFormData.projectCriteria[catIndex].details };
+      delete updatedCriteria[oldKey];
+      updatedCriteria[value] = updatedFormData.projectCriteria[catIndex].details[oldKey];
+      updatedFormData.projectCriteria[catIndex].details = updatedCriteria;
+    } else if (type === 'criteriaValue') {
+      const key = Object.keys(updatedFormData.projectCriteria[catIndex].details)[critIndex];
+      updatedFormData.projectCriteria[catIndex].details[key] = value;
     }
 
     setFormData(updatedFormData);
   };
 
 
+
   const addCategory = () => {
     setFormData({
       ...formData,
-      projectCategories: [...formData.projectCategories, { category: '', criteria: [{ title: '', value: '' }] }]
+      projectCriteria: [...formData.projectCriteria, { category: '', details: {} }]
     });
   };
 
   const addCriteria = (catIndex) => {
-    const updatedCategories = [...formData.projectCategories];
-    updatedCategories[catIndex].criteria.push({ title: '', value: '' });
+    const updatedCategories = [...formData.projectCriteria];
+    updatedCategories[catIndex].details = { ...updatedCategories[catIndex].details, '': '' };
     setFormData({
       ...formData,
-      projectCategories: updatedCategories
+      projectCriteria: updatedCategories
     });
   };
 
@@ -68,7 +81,10 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
       </Modal.Header>
 
       <Modal.Body>
-        <Form>
+        <Form onSubmit={(e) => {
+          e.preventDefault();
+          handleCreateProject(formData);
+        }}>
           <Modal.Title>
             <h3>Project</h3>
           </Modal.Title>
@@ -77,7 +93,7 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
             <Form.Control
               type="text"
               value={formData.projectTitle}
-              onChange={(e) => handleChange(e, null, null, 'projectTitle')}
+              onChange={(e) => handleChange(e, null, null, 'projectTitle', 'projectTitle')}
               required
             />
           </Form.Group>
@@ -86,39 +102,40 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
             <Form.Control
               type="text"
               value={formData.projectDescription}
-              onChange={(e) => handleChange(e, null, null, 'projectDescription')}
+              onChange={(e) => handleChange(e, null, null, 'projectDescription', 'projectDescription')}
               required
             />
           </Form.Group>
           <Modal.Title>
             <h3>Project Criteria</h3>
           </Modal.Title>
-          {formData.projectCategories.map((category, catIndex) => (
+          {formData.projectCriteria.map((item, catIndex) => (
             <Container key={catIndex}>
               <Row>
                 <Col>
                   <Form.Group>
-                    <Form.Label>Title</Form.Label>
+                    <Form.Label>Category</Form.Label>
                     <Form.Control
                       type="text"
                       name="category"
-                      value={category.category}
-                      onChange={(e) => handleChange(e, catIndex, null, 'category')}
+                      value={item.category}
+                      onChange={(e) => handleChange(e, catIndex, null, 'category', 'category')}
                       required
                     />
                   </Form.Group>
                 </Col>
               </Row>
-              {category.criteria.map((criteria, critIndex) => (
+
+              {Object.entries(item.details).map(([key, value], critIndex) => (
                 <Row key={critIndex}>
                   <Col>
                     <Form.Group>
                       <Form.Label>Item</Form.Label>
                       <Form.Control
                         type="text"
-                        name="title"
-                        value={criteria.title}
-                        onChange={(e) => handleChange(e, catIndex, critIndex, 'criteria')}
+                        name="key"
+                        value={key}
+                        onChange={(e) => handleChange(e, catIndex, critIndex, 'criteriaKey', 'criteriaKey')}
                         required
                       />
                     </Form.Group>
@@ -129,14 +146,15 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
                       <Form.Control
                         type="text"
                         name="value"
-                        value={criteria.value}
-                        onChange={(e) => handleChange(e, catIndex, critIndex, 'criteria')}
+                        value={value}
+                        onChange={(e) => handleChange(e, catIndex, critIndex, 'criteriaValue', 'criteriaValue')}
                         required
                       />
                     </Form.Group>
                   </Col>
                 </Row>
               ))}
+
               <Button variant="secondary" onClick={() => addCriteria(catIndex)}>
                 Add Criteria
               </Button>
