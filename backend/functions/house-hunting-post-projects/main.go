@@ -82,11 +82,16 @@ type HouseEntry struct {
 
 type Project struct {
 	Id           string       `json:"id"`
-	UserId       string       `json:"userId"`
 	Title        string       `json:"title"`
 	Description  string       `json:"description"`
 	Categories   []Category   `json:"catagories"`
 	HouseEntries []HouseEntry `json:"houseEntries"`
+}
+
+type User struct {
+	Id       string    `json:"id"`
+	Email    string    `json:"email"`
+	Projects []Project `json:"projects"`
 }
 
 func (jwt *Token) decodeSegment(seg string) ([]byte, error) {
@@ -130,14 +135,14 @@ func (jwt *Token) processJWT() string {
 	return jwt.JWT.Email
 }
 
-func (p *Project) generateId(pre IDType) string {
-	b := []byte(fmt.Sprintf("%s::%s", pre, p.UserId))
+func (u *User) generateId(pre IDType) string {
+	b := []byte(fmt.Sprintf("%s::%s", pre, u.Email))
 	return fmt.Sprintf("%x", md5.Sum(b))
 }
 
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
-	var project Project
-	err := json.Unmarshal([]byte(event.Body), &project)
+	var user User
+	err := json.Unmarshal([]byte(event.Body), &user)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 400,
@@ -150,29 +155,26 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		JWTPayload{},
 	}
 
-	email := token.processJWT()
-	project.UserId = email
+	user.Email = token.processJWT()
+	user.Id = user.generateId(USERID)
 
-	project.Id = project.generateId(USERID)
-	project.UserId = project.generateId(PROJECTID)
-
-	fmt.Println("ID:", project.UserId)
-
-	for i := range project.Categories {
-		project.Categories[i].Id = project.generateId(CategoryID)
-	}
-
-	for i := range project.HouseEntries {
-		project.HouseEntries[i].Id = project.generateId(EntryID)
-		for j := range project.HouseEntries[i].Scores {
-			project.HouseEntries[i].Scores[j].Id = project.generateId(ScoreID)
+	for i := range user.Projects {
+		user.Projects[i].Id = user.generateId(PROJECTID)
+		for j := range user.Projects[i].Categories {
+			user.Projects[i].Categories[j].Id = user.generateId(CategoryID)
 		}
-		for j := range project.HouseEntries[i].Notes {
-			project.HouseEntries[i].Notes[j].Id = project.generateId(NoteID)
+		for j := range user.Projects[i].HouseEntries {
+			user.Projects[i].HouseEntries[j].Id = user.generateId(EntryID)
+			for k := range user.Projects[i].HouseEntries[j].Scores {
+				user.Projects[i].HouseEntries[j].Scores[k].Id = user.generateId(ScoreID)
+			}
+			for k := range user.Projects[i].HouseEntries[j].Notes {
+				user.Projects[i].HouseEntries[j].Notes[k].Id = user.generateId(NoteID)
+			}
 		}
 	}
 
-	p, err := dynamodbattribute.Marshal(project)
+	p, err := dynamodbattribute.Marshal(user)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
