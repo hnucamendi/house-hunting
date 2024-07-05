@@ -126,14 +126,11 @@ func (jwt *Token) processJWT() string {
 	}
 
 	auth := strings.TrimSpace(authBearer)
-	fmt.Println("AUTH", auth)
 
 	err := jwt.parseJWT(auth)
 	if err != nil {
 		log.Printf("Failed to parse JWT")
 	}
-
-	fmt.Println("JWT", jwt.JWT)
 
 	return jwt.JWT.Email
 }
@@ -154,6 +151,8 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 
 	id := generateId(USERID, email)
 	db := dynamodb.New(sess)
+
+	fmt.Println("ID:", id)
 
 	out, err := db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String("UsersTable"),
