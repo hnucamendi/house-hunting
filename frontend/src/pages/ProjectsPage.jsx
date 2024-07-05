@@ -17,15 +17,15 @@ const LandingPage = () => {
   }, []);
 
   useEffect(() => {
-    // fetch(url.toString(), {
-    //   method: "GET",
-    //   headers: {
-    //     Accept: 'application/json',
-    //     Authorization: `Bearer ${sessionStorage.getItem('idToken')}`
-    //   }
-    // })
-    //   .then((response) => response.json())
-    //   .then((data) => setProjects(data));
+    fetch(url.toString(), {
+      method: "GET",
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${sessionStorage.getItem('idToken')}`
+      }
+    })
+      .then((response) => response.json())
+      .then((data) => setProjects(data));
   }, [url, uploadProjectCount])
 
   const handleShow = () => setHideCreateProject(false)
@@ -36,10 +36,14 @@ const LandingPage = () => {
       fetch('https://api.hnucamendi.net/projects', {
         method: "POST",
         body: JSON.stringify({
-          title: e.projectTitle,
-          description: e.projectDescription,
-          catagories: e.projectCategories,
-          houseEntries: [],
+          projects: [
+            {
+              title: e.projectTitle,
+              description: e.projectDescription,
+              criteria: e.projectCriteria,
+              houseEntries: [],
+            }
+          ]
         }),
         headers: {
           Accept: 'application/json',
