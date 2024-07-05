@@ -57,14 +57,10 @@ type HouseScores struct {
 	CriteriaId string `json:"criteriaId"`
 }
 
-type Item struct {
-	Details map[string]string `json:"details"`
-}
-
 type Criteria struct {
-	Id       string `json:"id"`
-	Category string `json:"category"`
-	Items    []Item `json:"items"`
+	Id       string            `json:"id"`
+	Category string            `json:"category"`
+	Details  map[string]string `json:"details"`
 }
 
 type HouseEntry struct {
