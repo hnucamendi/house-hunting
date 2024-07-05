@@ -89,6 +89,12 @@ type Project struct {
 	HouseEntries []HouseEntry `json:"houseEntries"`
 }
 
+type User struct {
+	Id       string    `json:"id"`
+	Email    string    `json:"email"`
+	Projects []Project `json:"projects"`
+}
+
 type ProjectsRequest struct {
 	UserId    string `json:"id"`
 	ProjectId string `json:"project_id"`
@@ -147,7 +153,6 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 	}
 
 	email := token.processJWT()
-	fmt.Println("Email:", email)
 
 	id := generateId(USERID, email)
 	db := dynamodb.New(sess)
