@@ -181,8 +181,8 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
-	var project Project
-	err = dynamodbattribute.UnmarshalMap(out.Item, &project)
+	var user User
+	err = dynamodbattribute.UnmarshalMap(out.Item, &user)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
@@ -190,7 +190,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
-	normalJson, err := json.MarshalIndent(project, "", "  ")
+	normalJson, err := json.MarshalIndent(user, "", "  ")
 	if err != nil {
 		fmt.Println("Error marshaling to JSON:", err)
 		return &events.APIGatewayV2HTTPResponse{
