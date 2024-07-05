@@ -21,7 +21,7 @@ var sess = session.Must(session.NewSession())
 type IDType string
 
 const (
-	USERID     IDType = "ID"
+	USERID     IDType = "USERID"
 	PROJECTID  IDType = "PROJECTID"
 	CRITERIAID IDType = "CRITERIAID"
 )
