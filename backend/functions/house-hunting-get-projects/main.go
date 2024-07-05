@@ -94,14 +94,14 @@ type ProjectsRequest struct {
 	ProjectId string `json:"project_id"`
 }
 
-func (jwt Token) decodeSegment(seg string) ([]byte, error) {
+func (jwt *Token) decodeSegment(seg string) ([]byte, error) {
 	if l := len(seg) % 4; l != 0 {
 		seg += strings.Repeat("=", 4-l)
 	}
 	return base64.URLEncoding.DecodeString(seg)
 }
 
-func (jwt Token) parseJWT(token string) error {
+func (jwt *Token) parseJWT(token string) error {
 	parts := strings.Split(token, ".")
 	if len(parts) != 3 {
 		return fmt.Errorf("token contains an invalid number of segments")
@@ -119,19 +119,21 @@ func (jwt Token) parseJWT(token string) error {
 	return nil
 }
 
-func (jwt Token) processJWT() string {
-	fmt.Println("TAMO", jwt.Headers)
+func (jwt *Token) processJWT() string {
 	authBearer, found := strings.CutPrefix(jwt.Headers["authorization"], "Bearer")
 	if !found {
 		log.Printf("Authorization header malformed")
 	}
 
 	auth := strings.TrimSpace(authBearer)
+	fmt.Println("AUTH", auth)
 
 	err := jwt.parseJWT(auth)
 	if err != nil {
 		log.Printf("Failed to parse JWT")
 	}
+
+	fmt.Println("JWT", jwt.JWT)
 
 	return jwt.JWT.Email
 }
