@@ -156,6 +156,8 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 	project.Id = project.generateId(USERID)
 	project.UserId = project.generateId(PROJECTID)
 
+	fmt.Println("ID:", project.Id)
+
 	for i := range project.Categories {
 		project.Categories[i].Id = project.generateId(CategoryID)
 	}
