@@ -57,11 +57,14 @@ type HouseScores struct {
 	CriteriaId string `json:"criteriaId"`
 }
 
+type Item struct {
+	Details map[string]string `json:"details"`
+}
+
 type Criteria struct {
 	Id       string `json:"id"`
 	Category string `json:"category"`
-	Key      string `json:"key"`
-	Value    string `json:"value"`
+	Items    []Item `json:"items"`
 }
 
 type HouseEntry struct {
@@ -158,12 +161,6 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 
 		for j := range user.Projects[i].Criteria {
 			user.Projects[i].Criteria[j].Id = user.generateId(CRITERIAID, user.Projects[i].Criteria[j].Category)
-		}
-
-		for j := range user.Projects[i].HouseEntries {
-			for k := range user.Projects[i].HouseEntries[j].Scores {
-				user.Projects[i].HouseEntries[j].Scores[k].CriteriaId = user.generateId(CRITERIAID, user.Projects[i].Criteria[j].Category)
-			}
 		}
 	}
 
