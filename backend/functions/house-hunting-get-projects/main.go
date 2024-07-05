@@ -123,7 +123,7 @@ func processJWT(header) string {
 }
 
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
- email := processJWT(event.Header)
+ email := processJWT(event.Headers)
 	fmt.Println("Email:", email)
 
 	id := event.QueryStringParameters["id"]
