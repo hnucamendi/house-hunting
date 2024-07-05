@@ -135,8 +135,13 @@ func (jwt *Token) processJWT() string {
 	return jwt.JWT.Email
 }
 
-func (u *User) generateId(pre IDType) string {
-	b := []byte(fmt.Sprintf("%s::%s", pre, u.Email))
+func (u *User) generateId(pre IDType, identifier string) string {
+	if pre == USERID {
+		b := []byte(fmt.Sprintf("%s::%s", pre, u.Email))
+		return fmt.Sprintf("%x", md5.Sum(b))
+	}
+
+	b := []byte(fmt.Sprintf("%s::%s::%s", pre, u.Email, identifier))
 	return fmt.Sprintf("%x", md5.Sum(b))
 }
 
@@ -156,20 +161,20 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 	}
 
 	user.Email = token.processJWT()
-	user.Id = user.generateId(USERID)
+	user.Id = user.generateId(USERID, "")
 
 	for i := range user.Projects {
-		user.Projects[i].Id = user.generateId(PROJECTID)
+		user.Projects[i].Id = user.generateId(PROJECTID, user.Projects[i].Title)
 		for j := range user.Projects[i].Categories {
-			user.Projects[i].Categories[j].Id = user.generateId(CategoryID)
+			user.Projects[i].Categories[j].Id = user.generateId(CategoryID, user.Projects[i].Categories[j].Category)
 		}
 		for j := range user.Projects[i].HouseEntries {
-			user.Projects[i].HouseEntries[j].Id = user.generateId(EntryID)
+			user.Projects[i].HouseEntries[j].Id = user.generateId(EntryID, user.Projects[i].HouseEntries[j].Address)
 			for k := range user.Projects[i].HouseEntries[j].Scores {
-				user.Projects[i].HouseEntries[j].Scores[k].Id = user.generateId(ScoreID)
+				user.Projects[i].HouseEntries[j].Scores[k].Id = user.generateId(ScoreID, user.Projects[i].HouseEntries[j].Scores[k].CriteriaId)
 			}
 			for k := range user.Projects[i].HouseEntries[j].Notes {
-				user.Projects[i].HouseEntries[j].Notes[k].Id = user.generateId(NoteID)
+				user.Projects[i].HouseEntries[j].Notes[k].Id = user.generateId(NoteID, user.Projects[i].HouseEntries[j].Notes[k].Title)
 			}
 		}
 	}
