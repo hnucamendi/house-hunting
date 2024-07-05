@@ -18,8 +18,7 @@ import (
 var sess = session.Must(session.NewSession())
 
 type Token struct {
-	Headers map[string]string
-	JWT     JWTPayload
+	Token     JWTPayload
 }
 
 type JWTPayload struct {
@@ -100,15 +99,15 @@ func (jwt Token) parseJWT(token string) error {
 		return fmt.Errorf("failed to decode JWT payload: %v", err)
 	}
 
-	if err := json.Unmarshal(payloadBytes, &jwt.JWT); err != nil {
+	if err := json.Unmarshal(payloadBytes, &jwt.Token); err != nil {
 		return fmt.Errorf("failed to unmarshal JWT payload: %v", err)
 	}
 
 	return nil
 }
 
-func (jwt Token) processJWT() string {
-	authBearer, found := strings.CutPrefix(jwt.Headers["authorization"], "Bearer")
+func processJWT(header) string {
+	authBearer, found := strings.CutPrefix(header["authorization"], "Bearer")
 	if !found {
 		log.Printf("Authorization header malformed")
 	}
@@ -124,12 +123,7 @@ func (jwt Token) processJWT() string {
 }
 
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
-	token := &Token{
-		event.Headers,
-		JWTPayload{},
-	}
-
-	email := token.processJWT()
+ email := processJWT(event.Header)
 	fmt.Println("Email:", email)
 
 	id := event.QueryStringParameters["id"]
