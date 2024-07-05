@@ -21,12 +21,9 @@ var sess = session.Must(session.NewSession())
 type IDType string
 
 const (
-	USERID     IDType = "ID"
+	USERID     IDType = "USERID"
 	PROJECTID  IDType = "PROJECTID"
-	CategoryID IDType = "CATEGORYID"
-	EntryID    IDType = "ENTRYID"
-	NoteID     IDType = "NOTEID"
-	ScoreID    IDType = "SCOREID"
+	CRITERIAID IDType = "CRITERIAID"
 )
 
 type Token struct {
@@ -51,30 +48,23 @@ type JWTPayload struct {
 }
 
 type HouseNotes struct {
-	Id    string `json:"id"`
 	Title string `json:"title"`
 	Note  string `json:"note"`
 }
 
 type HouseScores struct {
-	Id         string `json:"id"`
 	Score      int    `json:"score"`
 	CriteriaId string `json:"criteriaId"`
 }
 
 type Criteria struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
-type Category struct {
-	Id       string     `json:"id"`
-	Category string     `json:"category"`
-	Criteria []Criteria `json:"criteria"`
+	Id       string `json:"id"`
+	Category string `json:"category"`
+	Key      string `json:"key"`
+	Value    string `json:"value"`
 }
 
 type HouseEntry struct {
-	EntryId string        `json:"id"`
 	Address string        `json:"address"`
 	Scores  []HouseScores `json:"scores"`
 	Notes   []HouseNotes  `json:"notes"`
@@ -82,10 +72,9 @@ type HouseEntry struct {
 
 type Project struct {
 	Id           string       `json:"id"`
-	UserId       string       `json:"userId"`
 	Title        string       `json:"title"`
 	Description  string       `json:"description"`
-	Categories   []Category   `json:"catagories"`
+	Criteria     []Criteria   `json:"criteria"`
 	HouseEntries []HouseEntry `json:"houseEntries"`
 }
 

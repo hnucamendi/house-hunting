@@ -23,10 +23,7 @@ type IDType string
 const (
 	USERID     IDType = "ID"
 	PROJECTID  IDType = "PROJECTID"
-	CategoryID IDType = "CATEGORYID"
-	EntryID    IDType = "ENTRYID"
-	NoteID     IDType = "NOTEID"
-	ScoreID    IDType = "SCOREID"
+	CRITERIAID IDType = "CRITERIAID"
 )
 
 type Token struct {
@@ -51,30 +48,23 @@ type JWTPayload struct {
 }
 
 type HouseNotes struct {
-	Id    string `json:"id"`
 	Title string `json:"title"`
 	Note  string `json:"note"`
 }
 
 type HouseScores struct {
-	Id         string `json:"id"`
 	Score      int    `json:"score"`
 	CriteriaId string `json:"criteriaId"`
 }
 
 type Criteria struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
-}
-
-type Category struct {
-	Id       string     `json:"id"`
-	Category string     `json:"category"`
-	Criteria []Criteria `json:"criteria"`
+	Id       string `json:"id"`
+	Category string `json:"category"`
+	Key      string `json:"key"`
+	Value    string `json:"value"`
 }
 
 type HouseEntry struct {
-	Id      string        `json:"id"`
 	Address string        `json:"address"`
 	Scores  []HouseScores `json:"scores"`
 	Notes   []HouseNotes  `json:"notes"`
@@ -84,7 +74,7 @@ type Project struct {
 	Id           string       `json:"id"`
 	Title        string       `json:"title"`
 	Description  string       `json:"description"`
-	Categories   []Category   `json:"catagories"`
+	Criteria     []Criteria   `json:"criteria"`
 	HouseEntries []HouseEntry `json:"houseEntries"`
 }
 
@@ -165,16 +155,14 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 
 	for i := range user.Projects {
 		user.Projects[i].Id = user.generateId(PROJECTID, user.Projects[i].Title)
-		for j := range user.Projects[i].Categories {
-			user.Projects[i].Categories[j].Id = user.generateId(CategoryID, user.Projects[i].Categories[j].Category)
+
+		for j := range user.Projects[i].Criteria {
+			user.Projects[i].Criteria[j].Id = user.generateId(CRITERIAID, user.Projects[i].Criteria[j].Category)
 		}
+
 		for j := range user.Projects[i].HouseEntries {
-			user.Projects[i].HouseEntries[j].Id = user.generateId(EntryID, user.Projects[i].HouseEntries[j].Address)
 			for k := range user.Projects[i].HouseEntries[j].Scores {
-				user.Projects[i].HouseEntries[j].Scores[k].Id = user.generateId(ScoreID, user.Projects[i].HouseEntries[j].Scores[k].CriteriaId)
-			}
-			for k := range user.Projects[i].HouseEntries[j].Notes {
-				user.Projects[i].HouseEntries[j].Notes[k].Id = user.generateId(NoteID, user.Projects[i].HouseEntries[j].Notes[k].Title)
+				user.Projects[i].HouseEntries[j].Scores[k].CriteriaId = user.generateId(CRITERIAID, user.Projects[i].Criteria[j].Category)
 			}
 		}
 	}
