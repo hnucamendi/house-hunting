@@ -114,7 +114,7 @@ func processJWT(header map[string]string) string {
 
 	auth := strings.TrimSpace(authBearer)
 
-	err := jwt.parseJWT(auth)
+	err := parseJWT(auth)
 	if err != nil {
 		log.Printf("Failed to parse JWT")
 	}
