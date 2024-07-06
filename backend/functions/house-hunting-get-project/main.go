@@ -190,6 +190,8 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
+	fmt.Printf("JSON: %s\n", string(normalJson))
+
 	return &events.APIGatewayV2HTTPResponse{
 		StatusCode: 200,
 		Body:       string(normalJson),
