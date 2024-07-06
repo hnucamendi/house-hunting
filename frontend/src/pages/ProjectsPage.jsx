@@ -1,20 +1,19 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
+import {
+  Card,
+  Button,
+  Container,
+} from 'react-bootstrap';
 import CreateProjectModal from '../components/CreateProjectModal';
 import Project from '../components/Project';
 import "../styles/pages/projectsPage.css";
 
 
 const LandingPage = () => {
-  const [projects, setProjects] = useState([])
+  const [userData, setUserData] = useState([])
   const [uploadProjectCount, setUploadProjectCount] = useState(0)
   const [hideCreateProject, setHideCreateProject] = useState(true)
-
-  const url = useMemo(() => {
-    const newUrl = new URL('https://api.hnucamendi.net/projects');
-    newUrl.searchParams.append('id', "user1234");
-    newUrl.searchParams.append('project_id', "project1234");
-    return newUrl;
-  }, []);
+  const url = "https://api.hnucamendi.net/projects"
 
   useEffect(() => {
     fetch(url.toString(), {
@@ -25,7 +24,7 @@ const LandingPage = () => {
       }
     })
       .then((response) => response.json())
-      .then((data) => setProjects(data));
+      .then((data) => setUserData(data));
   }, [url, uploadProjectCount])
 
   const handleShow = () => setHideCreateProject(false)
@@ -57,36 +56,33 @@ const LandingPage = () => {
     }
   }
 
-  if (projects.length > 0) {
+  if (userData.projects?.length > 0) {
     return (
-      <div className="projects-page">
+      <Container>
         <h1>Your Projects</h1>
-        {projects.house_entries.map((project) => (
-          <Project key={project.id}>
-            <h2>{project.address}</h2>
-            <div>
-              <h3>{project.notes.title}</h3>
-              <p>{project.notes.note}</p>
-            </div>
-            <div>
-              <h3>{project.scores.title}</h3>
-              <p>{project.scores.score}</p>
-            </div>
-            <button>Select</button>
-          </Project>
-        ))}
-      </div>
+        <Card className="projects-page">
+          <Card.Body>
+            {userData.projects.map((project) => (
+              <Project key={userData.id}>
+                <Card.Title>{project.title}</Card.Title>
+                <Card.Subtitle>{project.description}</Card.Subtitle>
+                <Button variant="primary" href={`/projects/${project.id}`}>View Project</Button>
+              </Project>
+            ))}
+          </Card.Body>
+        </Card>
+      </Container>
     );
   }
 
-  if (!projects.house_entries) {
+  if (userData.length <= 0) {
     return (
-      <div className="projects-page">
+      <Container className="projects-page">
         <h1>Uh Oh ... You dont have any projects yet!</h1>
-        <button onClick={() => setHideCreateProject(!hideCreateProject)}
+        <Button onClick={() => setHideCreateProject(!hideCreateProject)}
         >
           Create Project
-        </button>
+        </Button>
         {
           hideCreateProject ? null :
             <CreateProjectModal
@@ -95,9 +91,15 @@ const LandingPage = () => {
               handleCreateProject={handleCreateProject}
             />
         }
-      </div>
+      </Container>
     )
   }
+
+  return (
+    <Container className="projects-page">
+      <h1>Loading...</h1>
+    </Container>
+  )
 };
 
 export default LandingPage;

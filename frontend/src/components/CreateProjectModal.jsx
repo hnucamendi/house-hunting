@@ -1,7 +1,14 @@
 import { useState } from "react"
 import PropTypes from 'prop-types';
 import "../styles/modal.css"
-import { Modal, Form, Button, Row, Col, Container } from 'react-bootstrap';
+import {
+  Modal,
+  Form,
+  Button,
+  Row,
+  Col,
+  Container
+} from 'react-bootstrap';
 
 export default function CreateProjectModal({ handleShow, handleHide, handleCreateProject }) {
   const [formData, setFormData] = useState({
@@ -14,23 +21,6 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
       }
     ]
   });
-
-  // const handleChange = (e) => {
-  //   const {
-  //     projectTitle,
-  //     projectDescription,
-  //     projectCriteriaName,
-  //     projectCriteriaValue
-  //   } = e.target;
-
-  //   setFormData((prevData) => ({
-  //     ...prevData,
-  //     [projectTitle]: projectTitle,
-  //     [projectDescription]: projectDescription,
-  //     [projectCriteriaName]: projectCriteriaName,
-  //     [projectCriteriaValue]: projectCriteriaValue
-  //   }));
-  // }
 
   const handleChange = (e, catIndex, critIndex, field, type) => {
     const { value } = e.target;

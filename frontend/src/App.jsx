@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Login from "./pages/public/Login.jsx";
 import ProjectsPage from "./pages/ProjectsPage.jsx";
+import HousePage from "./pages/HousePage.jsx";
 import Confirm from "./pages/public/Confirm.jsx";
 const App = () => {
   const isAuthenticated = () => {
@@ -27,6 +28,12 @@ const App = () => {
           path="/projects"
           element={
             isAuthenticated() ? <ProjectsPage /> : <Navigate replace to="/login" />
+          }
+        />
+        <Route
+          path="/projects/:projectId"
+          element={
+            <HousePage />
           }
         />
       </Routes>
