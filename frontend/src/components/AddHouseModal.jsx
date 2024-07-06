@@ -1,6 +1,5 @@
 import { useState } from "react"
 import PropTypes from 'prop-types';
-import "../styles/modal.css"
 import {
   Modal,
   Form,
@@ -115,10 +114,13 @@ export default function CreateProjectModal({ handleShow, handleHide, handleAddHo
               </div>
             ))}
           </Form.Group>
-          <Button onClick={(e) => {
-            e.preventDefault();
-            handleAddHouse(address, scores, notes)
-          }}
+          <Button
+            disabled={address === ""}
+            onClick={(e) => {
+              e.preventDefault();
+              handleAddHouse(address, scores, notes);
+              handleHide();
+            }}
             type="submit"
           >
             Add House

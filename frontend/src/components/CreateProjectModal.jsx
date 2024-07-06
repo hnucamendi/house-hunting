@@ -1,6 +1,5 @@
 import { useState } from "react"
 import PropTypes from 'prop-types';
-import "../styles/modal.css"
 import {
   Modal,
   Form,
@@ -21,6 +20,13 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
       }
     ]
   });
+  const [isProjectTitleFilled, setIsProjectTitleFilled] = useState(false);
+  const [isProjectDescriptionFilled, setIsProjectDescriptionFilled] = useState(false);
+  const [isProjectCriteriaCategory, setIsProjectCriteriaCategory] = useState(false);
+  const [isProjectCriteriaKey, setIsProjectCriteriaKey] = useState(false);
+  const [isProjectCriteriaValue, setIsProjectCriteriaValue] = useState(false);
+
+  const isFormFilled = isProjectCriteriaCategory && isProjectCriteriaKey && isProjectCriteriaValue && isProjectDescriptionFilled && isProjectTitleFilled;
 
   const handleChange = (e, catIndex, critIndex, field, type) => {
     const { value } = e.target;
@@ -43,8 +49,6 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
 
     setFormData(updatedFormData);
   };
-
-
 
   const addCategory = () => {
     setFormData({
@@ -83,7 +87,13 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
             <Form.Control
               type="text"
               value={formData.projectTitle}
-              onChange={(e) => handleChange(e, null, null, 'projectTitle', 'projectTitle')}
+              onChange={(e) => {
+                setIsProjectTitleFilled(false);
+                handleChange(e, null, null, 'projectTitle', 'projectTitle')
+                if (e.target.value !== "") {
+                  setIsProjectTitleFilled(true);
+                }
+              }}
               required
             />
           </Form.Group>
@@ -92,7 +102,13 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
             <Form.Control
               type="text"
               value={formData.projectDescription}
-              onChange={(e) => handleChange(e, null, null, 'projectDescription', 'projectDescription')}
+              onChange={(e) => {
+                setIsProjectDescriptionFilled(false);
+                handleChange(e, null, null, 'projectDescription', 'projectDescription')
+                if (e.target.value !== "") {
+                  setIsProjectDescriptionFilled(true);
+                }
+              }}
               required
             />
           </Form.Group>
@@ -109,7 +125,13 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
                       type="text"
                       name="category"
                       value={item.category}
-                      onChange={(e) => handleChange(e, catIndex, null, 'category', 'category')}
+                      onChange={(e) => {
+                        setIsProjectCriteriaCategory(false);
+                        handleChange(e, catIndex, null, 'category', 'category')
+                        if (e.target.value !== "") {
+                          setIsProjectCriteriaCategory(true);
+                        }
+                      }}
                       required
                     />
                   </Form.Group>
@@ -125,7 +147,13 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
                         type="text"
                         name="key"
                         value={key}
-                        onChange={(e) => handleChange(e, catIndex, critIndex, 'criteriaKey', 'criteriaKey')}
+                        onChange={(e) => {
+                          setIsProjectCriteriaKey(false);
+                          handleChange(e, catIndex, critIndex, 'criteriaKey', 'criteriaKey')
+                          if (e.target.value !== "") {
+                            setIsProjectCriteriaKey(true);
+                          }
+                        }}
                         required
                       />
                     </Form.Group>
@@ -137,7 +165,13 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
                         type="text"
                         name="value"
                         value={value}
-                        onChange={(e) => handleChange(e, catIndex, critIndex, 'criteriaValue', 'criteriaValue')}
+                        onChange={(e) => {
+                          setIsProjectCriteriaValue(false);
+                          handleChange(e, catIndex, critIndex, 'criteriaValue', 'criteriaValue')
+                          if (e.target.value !== "") {
+                            setIsProjectCriteriaValue(true);
+                          }
+                        }}
                         required
                       />
                     </Form.Group>
@@ -153,9 +187,10 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
           <Button variant="secondary" onClick={addCategory}>
             Add Category
           </Button>
-          <Button onClick={(e) => {
+          <Button disabled={!isFormFilled} onClick={(e) => {
             e.preventDefault();
             handleCreateProject(formData)
+            handleHide();
           }}
             type="submit"
           >

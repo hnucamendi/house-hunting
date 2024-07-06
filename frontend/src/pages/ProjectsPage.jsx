@@ -31,6 +31,11 @@ const LandingPage = () => {
   const handleHide = () => setHideCreateProject(true)
 
   const handleCreateProject = (e) => {
+    if (e.projectTitle === "" || e.projectDescription === "" || e.projectCriteria.length === 0) {
+      alert("Please fill out all fields")
+      return
+    }
+
     try {
       fetch('https://api.hnucamendi.net/project', {
         method: "POST",
@@ -58,6 +63,18 @@ const LandingPage = () => {
     return (
       <Container>
         <h1>Your Projects</h1>
+        <Button
+          onClick={() => setHideCreateProject(!hideCreateProject)}>
+          Create New Project
+        </Button>
+        {
+          hideCreateProject ? null :
+            <CreateProjectModal
+              handleShow={handleShow}
+              handleHide={handleHide}
+              handleCreateProject={handleCreateProject}
+            />
+        }
         <Card className="projects-page">
           <Card.Body>
             {userData.map((p, i) => (
@@ -73,7 +90,7 @@ const LandingPage = () => {
     );
   }
 
-  if (userData.length <= 0) {
+  if (userData === null) {
     return (
       <Container className="projects-page">
         <h1>Uh Oh ... You dont have any projects yet!</h1>
