@@ -70,10 +70,9 @@ type HouseEntry struct {
 }
 
 type Project struct {
-	Title        string       `json:"title"`
-	Description  string       `json:"description"`
-	Criteria     []Criteria   `json:"criteria"`
-	HouseEntries []HouseEntry `json:"houseEntries"`
+	Title       string     `json:"title"`
+	Description string     `json:"description"`
+	Criteria    []Criteria `json:"criteria"`
 }
 
 type User struct {
