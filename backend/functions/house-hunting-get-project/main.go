@@ -172,6 +172,8 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
+	fmt.Println(out.Item, out.GoString())
+
 	var user User
 	err = dynamodbattribute.UnmarshalMap(out.Item, &user)
 	if err != nil {
@@ -181,6 +183,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
+	fmt.Println(user)
 	normalJson, err := json.MarshalIndent(user, "", "  ")
 	if err != nil {
 		fmt.Println("Error marshaling to JSON:", err)
@@ -190,7 +193,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
-	fmt.Printf("JSON: %s\n", string(normalJson))
+	fmt.Printf("JSON: %s", string(normalJson))
 
 	return &events.APIGatewayV2HTTPResponse{
 		StatusCode: 200,
