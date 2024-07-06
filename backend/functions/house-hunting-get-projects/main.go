@@ -173,7 +173,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
-	var user User
+	var user []User
 	err = dynamodbattribute.UnmarshalListOfMaps(out.Items, &user)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
