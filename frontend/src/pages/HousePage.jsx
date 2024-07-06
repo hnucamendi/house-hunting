@@ -2,7 +2,9 @@ import { useLocation } from "react-router-dom"
 import {
   Container,
   Card,
-  Button
+  Button,
+  Row,
+  Col,
 } from "react-bootstrap"
 import AddHouseModal from "../components/AddHouseModal"
 import { useEffect, useState, useMemo } from "react"
@@ -20,6 +22,19 @@ export default function HousePage() {
     return u;
   }, [projectId])
 
+  useEffect(() => {
+    fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${sessionStorage.getItem('idToken')}`
+      }
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setUserProject(data)
+      })
+  }, [url, projectId])
 
   const handleShow = () => setHideAddHouse(false);
   const handleHide = () => setHideAddHouse(true);
@@ -46,19 +61,13 @@ export default function HousePage() {
     }
   }
 
-  useEffect(() => {
-    fetch(url, {
-      method: "GET",
-      headers: {
-        Accept: 'application/json',
-        Authorization: `Bearer ${sessionStorage.getItem('idToken')}`
-      }
+  const mapCriteria = useMemo(() => {
+    const map = {};
+    userProject?.project?.criteria.forEach((c) => {
+      map[c.id] = c.category;
     })
-      .then((response) => response.json())
-      .then((data) => {
-        setUserProject(data)
-      })
-  }, [url, projectId])
+    return map;
+  }, [userProject?.project?.criteria])
 
   if (userProject != null) {
     return (
@@ -71,11 +80,38 @@ export default function HousePage() {
           {
             userProject?.project?.houseEntries != null
               ? <Card.Body>
-                {userProject?.project?.houseEntries.map((houseEntry) => (
-                  <Card key={houseEntry.id}>
+                {userProject?.project?.houseEntries.map((houseEntry, index) => (
+                  <Card key={index}>
                     <Card.Body>
-                      <Card.Title>{houseEntry.title}</Card.Title>
-                      <Card.Text>{houseEntry.description}</Card.Text>
+                      <Card.Title>{houseEntry.address}</Card.Title>
+                      {
+                        houseEntry.scores.map((score, index) => (
+                          <div key={index}>
+                            <Row>
+                              <Col>
+                                {mapCriteria[score.criteriaId]}
+                              </Col>
+                              <Col>
+                                {score.score}
+                              </Col>
+                            </Row>
+                          </div>
+                        ))
+                      }
+                      {
+                        houseEntry.notes.map((note, index) => (
+                          <div key={index}>
+                            <Row>
+                              <Col>
+                                {note.title}
+                              </Col>
+                              <Col>
+                                {note.note}
+                              </Col>
+                            </Row>
+                          </div>
+                        ))
+                      }
                     </Card.Body>
                   </Card>
                 ))}
