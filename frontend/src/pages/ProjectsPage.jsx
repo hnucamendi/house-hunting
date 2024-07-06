@@ -24,9 +24,19 @@ const LandingPage = () => {
       }
     })
       .then((response) => {
-        console.log({ response })
+        if (!response.ok) {
+          throw new Error("HTTP status " + response.status);
+        }
+        return response.json();
       })
-      .then((data) => setUserData(data));
+      .then((data) => {
+        if (data.message === "No projects found") {
+          setUserData(null)
+          return
+        }
+        setUserData(data)
+        return
+      });
   }, [url, uploadProjectCount])
 
   const handleShow = () => setHideCreateProject(false)
@@ -92,7 +102,7 @@ const LandingPage = () => {
     );
   }
 
-  if (userData == null) {
+  if (userData === null) {
     return (
       <Container className="projects-page">
         <h1>Uh Oh ... You dont have any projects yet!</h1>
