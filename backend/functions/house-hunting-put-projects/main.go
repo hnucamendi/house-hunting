@@ -104,13 +104,8 @@ func (jwt *Token) processJWT() string {
 	return jwt.JWT.Email
 }
 
-func (he *HouseEntry) generateId(pre IDType, identifier string) string {
-	if pre == USERID {
-		b := []byte(fmt.Sprintf("%s::%s", pre, u.Email))
-		return fmt.Sprintf("%x", md5.Sum(b))
-	}
-
-	b := []byte(fmt.Sprintf("%s::%s::%s", pre, u.Email, identifier))
+func generateId(pre IDType, identifier string) string {
+	b := []byte(fmt.Sprintf("%s::%s", pre, identifier))
 	return fmt.Sprintf("%x", md5.Sum(b))
 }
 
@@ -138,7 +133,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 	}
 
 	email := token.processJWT()
-	id := he.generateId(USERID, email)
+	id := generateId(USERID, email)
 
 	p, err := dynamodbattribute.Marshal(he)
 	if err != nil {
