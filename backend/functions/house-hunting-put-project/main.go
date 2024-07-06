@@ -157,7 +157,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 				S: aws.String(projectId),
 			},
 		},
-		UpdateExpression: aws.String("SET houseEntries = list_append(if_not_exists(houseEntries, :h), :empty_list)"),
+		UpdateExpression: aws.String("SET project.houseEntries = list_append(if_not_exists(project.houseEntries, :empty_list), :h)"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":h": {
 				L: []*dynamodb.AttributeValue{p},
