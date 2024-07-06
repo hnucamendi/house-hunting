@@ -146,13 +146,16 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 	id := generateId(USERID, email)
 	db := dynamodb.New(sess)
 
-	fmt.Println("ID:", id)
-
-	out, err := db.GetItem(&dynamodb.GetItemInput{
+	out, err := db.Query(&dynamodb.QueryInput{
 		TableName: aws.String("UsersTable"),
-		Key: map[string]*dynamodb.AttributeValue{
+		KeyConditions: map[string]*dynamodb.Condition{
 			"id": {
-				S: &id,
+				ComparisonOperator: aws.String("EQ"),
+				AttributeValueList: []*dynamodb.AttributeValue{
+					{
+						S: aws.String(id),
+					},
+				},
 			},
 		},
 	})
@@ -163,15 +166,15 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
-	if out.Item == nil {
+	if *out.Count <= 0 {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 404,
-			Body:       "Item not found",
+			Body:       "Items not found",
 		}, nil
 	}
 
 	var user User
-	err = dynamodbattribute.UnmarshalMap(out.Item, &user)
+	err = dynamodbattribute.UnmarshalListOfMaps(out.Items, &user)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
