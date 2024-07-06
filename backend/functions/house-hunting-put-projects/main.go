@@ -145,6 +145,8 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 
 	db := dynamodb.New(sess)
 
+	fmt.Println("ID:", id, "Project ID:", projectId)
+
 	_, err = db.UpdateItem(&dynamodb.UpdateItemInput{
 		TableName: aws.String("UsersTable"),
 		Key: map[string]*dynamodb.AttributeValue{
@@ -155,10 +157,13 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 				S: aws.String(projectId),
 			},
 		},
-		UpdateExpression: aws.String("ADD houseEntries = list_append(houseEntries, :h)"),
+		UpdateExpression: aws.String("SET houseEntries = list_append(if_not_exists(houseEntries, :empty_list), :h)"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":h": {
 				L: []*dynamodb.AttributeValue{p},
+			},
+			":empty_list": {
+				L: []*dynamodb.AttributeValue{},
 			},
 		},
 	})
