@@ -64,12 +64,12 @@ export default function HousePage() {
     return (
       <Container>
         <Card>
-          <Card.Body key={userProject.projectId}>
-            <Card.Title>{userProject.project.title}</Card.Title>
-            <Card.Text>{userProject.project.description}</Card.Text>
+          <Card.Body key={userProject?.projectId}>
+            <Card.Title>{userProject?.project?.title}</Card.Title>
+            <Card.Text>{userProject?.project?.description}</Card.Text>
           </Card.Body>
           {
-            userProject?.project.houseEntries != null
+            userProject?.project?.houseEntries != null
               ? <Card.Body>
                 {userProject?.project?.houseEntries.map((houseEntry) => (
                   <Card key={houseEntry.id}>
@@ -91,7 +91,7 @@ export default function HousePage() {
                       handleShow={handleShow}
                       handleHide={handleHide}
                       handleAddHouse={handleAddHouse}
-                      criteria={userProject.criteria}
+                      criteria={userProject?.project?.criteria}
                     />
                 }
               </Card.Body>

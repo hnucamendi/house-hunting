@@ -1,8 +1,12 @@
 package main
 
 import (
+	"crypto/md5"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log"
+	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -59,8 +63,66 @@ type HouseEntry struct {
 	Notes   []HouseNotes  `json:"notes"`
 }
 
+func (jwt *Token) decodeSegment(seg string) ([]byte, error) {
+	if l := len(seg) % 4; l != 0 {
+		seg += strings.Repeat("=", 4-l)
+	}
+	return base64.URLEncoding.DecodeString(seg)
+}
+
+func (jwt *Token) parseJWT(token string) error {
+	parts := strings.Split(token, ".")
+	if len(parts) != 3 {
+		return fmt.Errorf("token contains an invalid number of segments")
+	}
+
+	payloadBytes, err := jwt.decodeSegment(parts[1])
+	if err != nil {
+		return fmt.Errorf("failed to decode JWT payload: %v", err)
+	}
+
+	if err := json.Unmarshal(payloadBytes, &jwt.JWT); err != nil {
+		return fmt.Errorf("failed to unmarshal JWT payload: %v", err)
+	}
+
+	return nil
+}
+
+func (jwt *Token) processJWT() string {
+	authBearer, found := strings.CutPrefix(jwt.Headers["authorization"], "Bearer")
+	if !found {
+		log.Printf("Authorization header malformed")
+	}
+
+	auth := strings.TrimSpace(authBearer)
+
+	err := jwt.parseJWT(auth)
+	if err != nil {
+		log.Printf("Failed to parse JWT")
+	}
+
+	return jwt.JWT.Email
+}
+
+func (he *HouseEntry) generateId(pre IDType, identifier string) string {
+	if pre == USERID {
+		b := []byte(fmt.Sprintf("%s::%s", pre, u.Email))
+		return fmt.Sprintf("%x", md5.Sum(b))
+	}
+
+	b := []byte(fmt.Sprintf("%s::%s::%s", pre, u.Email, identifier))
+	return fmt.Sprintf("%x", md5.Sum(b))
+}
+
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
 	projectId := event.QueryStringParameters["projectId"]
+	if projectId == "" {
+		return &events.APIGatewayV2HTTPResponse{
+			StatusCode: 400,
+			Body:       "Missing projectId",
+		}, nil
+	}
+
 	var he HouseEntry
 	err := json.Unmarshal([]byte(event.Body), &he)
 	if err != nil {
@@ -69,6 +131,14 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 			Body:       fmt.Sprintf("Failed to parse request: %v", err),
 		}, nil
 	}
+
+	token := &Token{
+		event.Headers,
+		JWTPayload{},
+	}
+
+	email := token.processJWT()
+	id := he.generateId(USERID, email)
 
 	p, err := dynamodbattribute.Marshal(he)
 	if err != nil {
@@ -84,10 +154,13 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		TableName: aws.String("ProjectsTable"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"id": {
+				S: aws.String(id),
+			},
+			"projectId": {
 				S: aws.String(projectId),
 			},
 		},
-		UpdateExpression: aws.String("SET houses = list_append(houses, :h)"),
+		UpdateExpression: aws.String("ADD houseEntries = list_append(houseEntries, :h)"),
 		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
 			":h": {
 				L: []*dynamodb.AttributeValue{p},
