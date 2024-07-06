@@ -146,7 +146,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 	db := dynamodb.New(sess)
 
 	_, err = db.UpdateItem(&dynamodb.UpdateItemInput{
-		TableName: aws.String("ProjectsTable"),
+		TableName: aws.String("UsersTable"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"id": {
 				S: aws.String(id),
