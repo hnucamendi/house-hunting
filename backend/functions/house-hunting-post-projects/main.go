@@ -78,9 +78,10 @@ type Project struct {
 }
 
 type User struct {
-	Id       string    `json:"id"`
-	Email    string    `json:"email"`
-	Projects []Project `json:"projects"`
+	Id        string  `json:"id"`
+	ProjectId string  `json:"projectId"`
+	Email     string  `json:"email"`
+	Project   Project `json:"project"`
 }
 
 func (jwt *Token) decodeSegment(seg string) ([]byte, error) {
@@ -151,13 +152,10 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 
 	user.Email = token.processJWT()
 	user.Id = user.generateId(USERID, "")
+	user.ProjectId = user.generateId(PROJECTID, user.Project.Title)
 
-	for i := range user.Projects {
-		user.Projects[i].Id = user.generateId(PROJECTID, user.Projects[i].Title)
-
-		for j := range user.Projects[i].Criteria {
-			user.Projects[i].Criteria[j].Id = user.generateId(CRITERIAID, user.Projects[i].Criteria[j].Category)
-		}
+	for i := range user.Project.Criteria {
+		user.Project.Criteria[i].Id = user.generateId(CRITERIAID, user.Project.Criteria[i].Category)
 	}
 
 	p, err := dynamodbattribute.Marshal(user)

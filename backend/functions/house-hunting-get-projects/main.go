@@ -78,9 +78,10 @@ type Project struct {
 }
 
 type User struct {
-	Id       string    `json:"id"`
-	Email    string    `json:"email"`
-	Projects []Project `json:"projects"`
+	Id        string  `json:"id"`
+	ProjectId string  `json:"projectId"`
+	Email     string  `json:"email"`
+	Project   Project `json:"project"`
 }
 
 type ProjectsRequest struct {
