@@ -56,17 +56,17 @@ const LandingPage = () => {
     }
   }
 
-  if (userData.projects?.length > 0) {
+  if (userData.length > 0) {
     return (
       <Container>
         <h1>Your Projects</h1>
         <Card className="projects-page">
           <Card.Body>
-            {userData.projects.map((project) => (
-              <Project key={userData.id}>
-                <Card.Title>{project.title}</Card.Title>
-                <Card.Subtitle>{project.description}</Card.Subtitle>
-                <Button variant="primary" href={`/projects/${project.id}`}>View Project</Button>
+            {userData.map((p, i) => (
+              <Project key={userData?.projectId || i}>
+                <Card.Title>{p.project.title}</Card.Title>
+                <Card.Subtitle>{p.project.description}</Card.Subtitle>
+                <Button variant="primary" href={`/projects/${p.projectId}`}>View Project</Button>
               </Project>
             ))}
           </Card.Body>

@@ -5,7 +5,7 @@ import {
   Button
 } from "react-bootstrap"
 import AddHouseModal from "../components/AddHouseModal"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 
 export default function HousePage() {
   const [userProjects, setUserProjects] = useState([]);
@@ -13,14 +13,19 @@ export default function HousePage() {
   const location = useLocation();
 
   const projectId = location.pathname.split("/")[2];
-  const url = `https://api.hnucamendi.net/projects`;
+
+  const url = useMemo(() => {
+    const u = new URL(`https://api.hnucamendi.net/project`);
+    u.searchParams.append("projectId", projectId);
+    return u;
+  }, [projectId])
 
 
   const handleShow = () => setHideAddHouse(false);
   const handleHide = () => setHideAddHouse(true);
   const handleAddHouse = (address, scores, notes) => {
     try {
-      fetch(`https://api.hnucamendi.net/projects?projectId=${projectId}}`, {
+      fetch(url, {
         method: "PUT",
         body: JSON.stringify({
           houseEntries: [
@@ -52,14 +57,12 @@ export default function HousePage() {
       .then((response) => response.json())
       .then((data) => {
         data?.projects.filter((project) => {
-          if (project.id === projectId) {
+          if (project === projectId) {
             setUserProjects(project)
           }
         }) || setUserProjects(null)
       })
   }, [url, projectId])
-
-  // console.log(userProjects.criteria)
 
   if (userProjects?.id === projectId) {
     return (
