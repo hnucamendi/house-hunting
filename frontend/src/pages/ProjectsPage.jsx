@@ -10,7 +10,7 @@ import "../styles/pages/projectsPage.css";
 
 
 const LandingPage = () => {
-  const [userData, setUserData] = useState([])
+  const [userData, setUserData] = useState(null)
   const [uploadProjectCount, setUploadProjectCount] = useState(0)
   const [hideCreateProject, setHideCreateProject] = useState(true)
   const url = "https://api.hnucamendi.net/projects"
@@ -23,7 +23,9 @@ const LandingPage = () => {
         Authorization: `Bearer ${sessionStorage.getItem('idToken')}`
       }
     })
-      .then((response) => response.json())
+      .then((response) => {
+        console.log({ response })
+      })
       .then((data) => setUserData(data));
   }, [url, uploadProjectCount])
 
@@ -59,7 +61,7 @@ const LandingPage = () => {
     }
   }
 
-  if (userData.length > 0) {
+  if (userData !== null && userData.length > 0) {
     return (
       <Container>
         <h1>Your Projects</h1>
@@ -90,7 +92,7 @@ const LandingPage = () => {
     );
   }
 
-  if (userData === null) {
+  if (userData == null) {
     return (
       <Container className="projects-page">
         <h1>Uh Oh ... You dont have any projects yet!</h1>

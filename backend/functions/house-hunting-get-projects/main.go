@@ -168,8 +168,8 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 
 	if *out.Count <= 0 {
 		return &events.APIGatewayV2HTTPResponse{
-			StatusCode: 404,
-			Body:       "Items not found",
+			StatusCode: 200,
+			Body:       `{"message": "No projects found"}`,
 		}, nil
 	}
 
