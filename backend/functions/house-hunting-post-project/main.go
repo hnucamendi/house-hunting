@@ -157,10 +157,6 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		user.Project.Criteria[i].Id = user.generateId(CRITERIAID, user.Project.Criteria[i].Category)
 	}
 
-	fmt.Println(user.Project.HouseEntries)
-	user.Project.HouseEntries = []HouseEntry{}
-	fmt.Println(user.Project.HouseEntries)
-
 	p, err := dynamodbattribute.Marshal(user)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
