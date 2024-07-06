@@ -8,7 +8,7 @@ import AddHouseModal from "../components/AddHouseModal"
 import { useEffect, useState, useMemo } from "react"
 
 export default function HousePage() {
-  const [userProjects, setUserProjects] = useState([]);
+  const [userProject, setUserProject] = useState({});
   const [hideAddHouse, setHideAddHouse] = useState(true);
   const location = useLocation();
 
@@ -56,26 +56,22 @@ export default function HousePage() {
     })
       .then((response) => response.json())
       .then((data) => {
-        data?.projects.filter((project) => {
-          if (project === projectId) {
-            setUserProjects(project)
-          }
-        }) || setUserProjects(null)
+        setUserProject(data)
       })
   }, [url, projectId])
 
-  if (userProjects?.id === projectId) {
+  if (userProject != null) {
     return (
       <Container>
         <Card>
-          <Card.Body key={userProjects.id}>
-            <Card.Title>{userProjects.title}</Card.Title>
-            <Card.Text>{userProjects.description}</Card.Text>
+          <Card.Body key={userProject.projectId}>
+            <Card.Title>{userProject.project.title}</Card.Title>
+            <Card.Text>{userProject.project.description}</Card.Text>
           </Card.Body>
           {
-            userProjects?.houseEntries != null
+            userProject?.project.houseEntries != null
               ? <Card.Body>
-                {userProjects?.houseEntries.map((houseEntry) => (
+                {userProject?.project?.houseEntries.map((houseEntry) => (
                   <Card key={houseEntry.id}>
                     <Card.Body>
                       <Card.Title>{houseEntry.title}</Card.Title>
@@ -95,7 +91,7 @@ export default function HousePage() {
                       handleShow={handleShow}
                       handleHide={handleHide}
                       handleAddHouse={handleAddHouse}
-                      criteria={userProjects.criteria}
+                      criteria={userProject.criteria}
                     />
                 }
               </Card.Body>

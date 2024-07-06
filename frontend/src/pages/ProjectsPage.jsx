@@ -32,17 +32,15 @@ const LandingPage = () => {
 
   const handleCreateProject = (e) => {
     try {
-      fetch('https://api.hnucamendi.net/projects', {
+      fetch('https://api.hnucamendi.net/project', {
         method: "POST",
         body: JSON.stringify({
-          projects: [
-            {
-              title: e.projectTitle,
-              description: e.projectDescription,
-              criteria: e.projectCriteria,
-              houseEntries: [],
-            }
-          ]
+          project: {
+            title: e.projectTitle,
+            description: e.projectDescription,
+            criteria: e.projectCriteria,
+            houseEntries: [],
+          }
         }),
         headers: {
           Accept: 'application/json',
