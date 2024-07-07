@@ -58,21 +58,10 @@ type JWTPayload struct {
 	Email           string `json:"email"`
 }
 
-type HouseScores struct {
-	Score      float32 `json:"score"`
-	CriteriaId string  `json:"criteriaId"`
-}
-
 type Criteria struct {
 	Id       string            `json:"id"`
 	Category string            `json:"category"`
 	Details  map[string]string `json:"details"`
-}
-
-type HouseEntry struct {
-	Address string        `json:"address"`
-	Scores  []HouseScores `json:"scores"`
-	Notes   []string      `json:"notes"`
 }
 
 type Project struct {
@@ -179,7 +168,7 @@ func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
-			Body:       fmt.Sprintf("Failed to put item: %v", err),
+			Body:       fmt.Sprintf("Failed to put item: %v\n%v\n%v\n", err, item, ctx),
 		}, nil
 	}
 

@@ -58,7 +58,6 @@ const LandingPage = () => {
             title: e.projectTitle,
             description: e.projectDescription,
             criteria: e.projectCriteria,
-            houseEntries: [],
           }
         }),
         headers: {
