@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/json"
@@ -10,13 +11,24 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
-var sess = session.Must(session.NewSession())
+var (
+	db *dynamodb.Client
+)
+
+func init() {
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		log.Fatalf("Failed to load SDK configuration: %v", err)
+	}
+	db = dynamodb.NewFromConfig(cfg)
+}
 
 type IDType string
 
@@ -130,7 +142,7 @@ func generateId(pre IDType, key string) string {
 	return fmt.Sprintf("%x", md5.Sum(b))
 }
 
-func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
+func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
 	token := &Token{
 		event.Headers,
 		JWTPayload{},
@@ -138,21 +150,21 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 
 	projectId := event.QueryStringParameters["projectId"]
 	email := token.processJWT()
-
 	id := generateId(USERID, email)
-	db := dynamodb.New(sess)
 
-	out, err := db.GetItem(&dynamodb.GetItemInput{
+	item := &dynamodb.GetItemInput{
 		TableName: aws.String("UsersTable"),
-		Key: map[string]*dynamodb.AttributeValue{
-			"id": {
-				S: aws.String(id),
+		Key: map[string]types.AttributeValue{
+			"id": &types.AttributeValueMemberS{
+				Value: id,
 			},
-			"projectId": {
-				S: aws.String(projectId),
+			"projectId": &types.AttributeValueMemberS{
+				Value: projectId,
 			},
 		},
-	})
+	}
+
+	out, err := db.GetItem(ctx, item)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
@@ -163,12 +175,12 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 	if out.Item == nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 404,
-			Body:       "Items not found",
+			Body:       `{"message": "Project not found"}`,
 		}, nil
 	}
 
 	var user User
-	err = dynamodbattribute.UnmarshalMap(out.Item, &user)
+	err = attributevalue.UnmarshalMap(out.Item, &user)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
@@ -176,7 +188,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
-	normalJson, err := json.MarshalIndent(user, "", "  ")
+	responseJSON, err := json.MarshalIndent(user, "", "  ")
 	if err != nil {
 		fmt.Println("Error marshaling to JSON:", err)
 		return &events.APIGatewayV2HTTPResponse{
@@ -187,7 +199,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 
 	return &events.APIGatewayV2HTTPResponse{
 		StatusCode: 200,
-		Body:       string(normalJson),
+		Body:       string(responseJSON),
 	}, nil
 }
 

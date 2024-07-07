@@ -91,11 +91,6 @@ type User struct {
 	Project   Project `json:"project"`
 }
 
-type ProjectsRequest struct {
-	UserId    string `json:"id"`
-	ProjectId string `json:"project_id"`
-}
-
 func (jwt *Token) decodeSegment(seg string) ([]byte, error) {
 	if l := len(seg) % 4; l != 0 {
 		seg += strings.Repeat("=", 4-l)
@@ -150,24 +145,6 @@ func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (
 
 	email := token.processJWT()
 	id := generateId(USERID, email)
-	dynnoID, err := attributevalue.Marshal(id)
-	if err != nil {
-		return &events.APIGatewayV2HTTPResponse{
-			StatusCode: 500,
-			Body:       fmt.Sprintf("Failed to marshal ID: %v", err),
-		}, nil
-	}
-
-	// Extract pagination parameters from the query string
-	var lastEvaluatedKey map[string]types.AttributeValue
-	if lastKeyStr := event.QueryStringParameters["lastEvaluatedKey"]; lastKeyStr != "" {
-		if err := json.Unmarshal([]byte(lastKeyStr), &lastEvaluatedKey); err != nil {
-			return &events.APIGatewayV2HTTPResponse{
-				StatusCode: 400,
-				Body:       fmt.Sprintf("Invalid lastEvaluatedKey: %v", err),
-			}, nil
-		}
-	}
 
 	input := &dynamodb.QueryInput{
 		TableName: aws.String("UsersTable"),
@@ -175,7 +152,9 @@ func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (
 			"id": {
 				ComparisonOperator: types.ComparisonOperatorEq,
 				AttributeValueList: []types.AttributeValue{
-					dynnoID,
+					&types.AttributeValueMemberS{
+						Value: id,
+					},
 				},
 			},
 		},
@@ -205,15 +184,7 @@ func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (
 		}, nil
 	}
 
-	response := struct {
-		Users            []User                          `json:"users"`
-		LastEvaluatedKey map[string]types.AttributeValue `json:"lastEvaluatedKey,omitempty"`
-	}{
-		Users:            users,
-		LastEvaluatedKey: out.LastEvaluatedKey,
-	}
-
-	responseJSON, err := json.MarshalIndent(response, "", "  ")
+	responseJSON, err := json.MarshalIndent(users, "", "  ")
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
