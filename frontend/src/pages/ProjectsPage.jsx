@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useSessionCheck } from '../utils/authService';
 import {
   Card,
   Button,
@@ -10,6 +11,7 @@ import "../styles/pages/projectsPage.css";
 
 
 const LandingPage = () => {
+  useSessionCheck();
   const [userData, setUserData] = useState(null)
   const [uploadProjectCount, setUploadProjectCount] = useState(0)
   const [hideCreateProject, setHideCreateProject] = useState(true)

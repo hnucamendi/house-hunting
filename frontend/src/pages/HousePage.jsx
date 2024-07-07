@@ -1,4 +1,5 @@
 import { useLocation } from "react-router-dom"
+import { useSessionCheck } from "../utils/authService"
 import {
   Container,
   Card,
@@ -10,6 +11,7 @@ import AddHouseModal from "../components/AddHouseModal"
 import { useEffect, useState, useMemo } from "react"
 
 export default function HousePage() {
+  useSessionCheck();
   const [userProject, setUserProject] = useState({});
   const [hideAddHouse, setHideAddHouse] = useState(true);
   const location = useLocation();
