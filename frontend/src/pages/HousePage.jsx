@@ -53,10 +53,15 @@ export default function HousePage() {
 
   const handleShow = () => setHideAddHouse(false);
   const handleHide = () => setHideAddHouse(true);
+
   const handleAddHouse = (address, scores, notes) => {
     if (address === "") {
       alert("Please fill out address field")
       return
+    }
+
+    if (notes.length === 0) {
+      notes.push("No notes")
     }
 
     try {
@@ -128,23 +133,17 @@ export default function HousePage() {
                       }
                       <Row>
                         <Col>
-                          Average Score:
+                          <Card.Text>Average Score:</Card.Text>
                         </Col>
                         <Col>
                           {houseEntry.scores.averageScore}
                         </Col>
+                        <Card.Text>Notes:</Card.Text>
                       </Row>
                       {
-                        houseEntry.notes.map((note, index) => (
+                        houseEntry?.notes.map((note, index) => (
                           <div key={index}>
-                            <Row>
-                              <Col>
-                                {note.title}
-                              </Col>
-                              <Col>
-                                {note.note}
-                              </Col>
-                            </Row>
+                            {note}
                           </div>
                         ))
                       }

@@ -48,8 +48,8 @@ type JWTPayload struct {
 }
 
 type HouseScores struct {
-	Score      int    `json:"score"`
-	CriteriaId string `json:"criteriaId"`
+	Score      float32 `json:"score"`
+	CriteriaId string  `json:"criteriaId"`
 }
 
 type HouseEntry struct {
