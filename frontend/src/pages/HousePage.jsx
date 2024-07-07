@@ -30,7 +30,6 @@ export default function HousePage() {
     })
   }
 
-
   const url = useMemo(() => {
     const u = new URL(`https://api.hnucamendi.net/project`);
     u.searchParams.append("projectId", projectId);

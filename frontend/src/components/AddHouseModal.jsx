@@ -13,16 +13,14 @@ export default function CreateProjectModal({ handleShow, handleHide, handleAddHo
   const [scores, setScores] = useState([]);
   const [notes, setNotes] = useState([]);
 
-  const [noteKey, setNoteKey] = useState('');
-  const [noteValue, setNoteValue] = useState('');
+  const [note, setNote] = useState('');
 
-  const handleAddNote = (key, value) => {
+  const handleAddNote = (value) => {
     const newNotes = [...notes];
-    newNotes.push({ title: key, note: value });
+    newNotes.push(value);
     setNotes(newNotes);
 
-    setNoteKey("")
-    setNoteValue("")
+    setNote("")
   };
 
   return (
@@ -52,25 +50,12 @@ export default function CreateProjectModal({ handleShow, handleHide, handleAddHo
           <Form.Group>
             <Form.Label>Notes</Form.Label>
             <Row>
-
               <Col>
-                <Form.Label>Note Title</Form.Label>
                 <Form.Control
                   type="text"
-                  value={noteKey}
+                  value={note}
                   onChange={(e) => {
-                    setNoteKey(e.target.value)
-                  }}
-                  required
-                />
-              </Col>
-              <Col>
-                <Form.Label>Note</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={noteValue}
-                  onChange={(e) => {
-                    setNoteValue(e.target.value)
+                    setNote(e.target.value)
                   }}
                   required
                 />
@@ -90,7 +75,7 @@ export default function CreateProjectModal({ handleShow, handleHide, handleAddHo
             ))}
             <Button onClick={(e) => {
               e.preventDefault()
-              handleAddNote(noteKey, noteValue)
+              handleAddNote(note)
             }}>
               Add Note
             </Button>
