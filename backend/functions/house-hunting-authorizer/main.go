@@ -41,7 +41,6 @@ func generateDeny() *events.APIGatewayV2CustomAuthorizerSimpleResponse {
 }
 
 func decodeSegment(seg string) ([]byte, error) {
-	// Add padding if necessary
 	if l := len(seg) % 4; l != 0 {
 		seg += strings.Repeat("=", 4-l)
 	}

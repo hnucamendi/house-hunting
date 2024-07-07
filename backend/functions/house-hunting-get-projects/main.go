@@ -1,22 +1,36 @@
 package main
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	jsoniter "github.com/json-iterator/go"
 )
 
-var sess = session.Must(session.NewSession())
+var (
+	db       *dynamodb.Client
+	json     = jsoniter.ConfigCompatibleWithStandardLibrary
+	pageSize = 20 // Number of items to fetch per page
+)
+
+func init() {
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		log.Fatalf("Failed to load SDK configuration: %v", err)
+	}
+	db = dynamodb.NewFromConfig(cfg)
+}
 
 type IDType string
 
@@ -130,30 +144,49 @@ func generateId(pre IDType, key string) string {
 	return fmt.Sprintf("%x", md5.Sum(b))
 }
 
-func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
+func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
 	token := &Token{
 		event.Headers,
 		JWTPayload{},
 	}
 
 	email := token.processJWT()
-
 	id := generateId(USERID, email)
-	db := dynamodb.New(sess)
+	dynnoID, err := attributevalue.Marshal(id)
+	if err != nil {
+		return &events.APIGatewayV2HTTPResponse{
+			StatusCode: 500,
+			Body:       fmt.Sprintf("Failed to marshal ID: %v", err),
+		}, nil
+	}
 
-	out, err := db.Query(&dynamodb.QueryInput{
+	// Extract pagination parameters from the query string
+	var lastEvaluatedKey map[string]types.AttributeValue
+	if lastKeyStr := event.QueryStringParameters["lastEvaluatedKey"]; lastKeyStr != "" {
+		if err := json.Unmarshal([]byte(lastKeyStr), &lastEvaluatedKey); err != nil {
+			return &events.APIGatewayV2HTTPResponse{
+				StatusCode: 400,
+				Body:       fmt.Sprintf("Invalid lastEvaluatedKey: %v", err),
+			}, nil
+		}
+	}
+
+	input := &dynamodb.QueryInput{
 		TableName: aws.String("UsersTable"),
-		KeyConditions: map[string]*dynamodb.Condition{
+		KeyConditions: map[string]types.Condition{
 			"id": {
-				ComparisonOperator: aws.String("EQ"),
-				AttributeValueList: []*dynamodb.AttributeValue{
-					{
-						S: aws.String(id),
-					},
+				ComparisonOperator: types.ComparisonOperatorEq,
+				AttributeValueList: []types.AttributeValue{
+					dynnoID,
 				},
 			},
 		},
-	})
+		Limit:                aws.Int32(int32(pageSize)),
+		ExclusiveStartKey:    lastEvaluatedKey,
+		ProjectionExpression: aws.String("id, projectId, email, project.id, project.title, project.description"),
+	}
+
+	out, err := db.Query(ctx, input)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
@@ -161,25 +194,32 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
-	if *out.Count <= 0 {
+	if out.Count <= 0 {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 200,
 			Body:       `{"message": "No projects found"}`,
 		}, nil
 	}
 
-	var user []User
-	err = dynamodbattribute.UnmarshalListOfMaps(out.Items, &user)
+	var users []User
+	err = attributevalue.UnmarshalListOfMaps(out.Items, &users)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
-			Body:       fmt.Sprintf("Failed to unmarshal item: %v\n", err),
+			Body:       fmt.Sprintf("Failed to unmarshal items: %v", err),
 		}, nil
 	}
 
-	normalJson, err := json.MarshalIndent(user, "", "  ")
+	response := struct {
+		Users            []User                          `json:"users"`
+		LastEvaluatedKey map[string]types.AttributeValue `json:"lastEvaluatedKey,omitempty"`
+	}{
+		Users:            users,
+		LastEvaluatedKey: out.LastEvaluatedKey,
+	}
+
+	responseJSON, err := json.MarshalIndent(response, "", "  ")
 	if err != nil {
-		fmt.Println("Error marshaling to JSON:", err)
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
 			Body:       fmt.Sprintf("Failed to marshal JSON: %v", err),
@@ -188,7 +228,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 
 	return &events.APIGatewayV2HTTPResponse{
 		StatusCode: 200,
-		Body:       string(normalJson),
+		Body:       string(responseJSON),
 	}, nil
 }
 
