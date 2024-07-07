@@ -13,11 +13,16 @@ export default function CreateProjectModal({ handleShow, handleHide, handleAddHo
   const [scores, setScores] = useState([]);
   const [notes, setNotes] = useState([]);
 
-  const [note, setNote] = useState('');
+  const [noteKey, setNoteKey] = useState('');
+  const [noteValue, setNoteValue] = useState('');
 
-  const handleAddNote = (e) => {
-    setNotes([...notes, e]);
-    setNote("")
+  const handleAddNote = (key, value) => {
+    const newNotes = [...notes];
+    newNotes.push({ title: key, note: value });
+    setNotes(newNotes);
+
+    setNoteKey("")
+    setNoteValue("")
   };
 
   return (
@@ -46,27 +51,46 @@ export default function CreateProjectModal({ handleShow, handleHide, handleAddHo
           </Form.Group>
           <Form.Group>
             <Form.Label>Notes</Form.Label>
-            <Form.Control
-              type="text"
-              value={note}
-              onChange={(e) => {
-                setNote(e.target.value)
-              }}
-              required
-            />
+            <Row>
+
+              <Col>
+                <Form.Label>Note Title</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={noteKey}
+                  onChange={(e) => {
+                    setNoteKey(e.target.value)
+                  }}
+                  required
+                />
+              </Col>
+              <Col>
+                <Form.Label>Note</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={noteValue}
+                  onChange={(e) => {
+                    setNoteValue(e.target.value)
+                  }}
+                  required
+                />
+              </Col>
+            </Row>
             {notes.map((note, index) => (
-              <Row key={index}>
-                <Col>
-                  {note}
-                </Col>
-                <Col>
-                  <Button onClick={() => notes.splice(index, 1)}>Delete Note</Button>
-                </Col>
-              </Row>
+              <div key={index}>
+                <Row >
+                  <Col>
+                    {note.note}
+                  </Col>
+                  <Col>
+                    <Button onClick={() => notes.splice(index, 1)}>Delete Note</Button>
+                  </Col>
+                </Row>
+              </div>
             ))}
             <Button onClick={(e) => {
               e.preventDefault()
-              handleAddNote(note)
+              handleAddNote(noteKey, noteValue)
             }}>
               Add Note
             </Button>
@@ -104,7 +128,7 @@ export default function CreateProjectModal({ handleShow, handleHide, handleAddHo
                           e.target.value = 0;
                         }
                         const newScores = [...scores];
-                        newScores[index] = { score: e.target.value, criteriaId: criterion.category };
+                        newScores[index] = { score: Number(e.target.value), criteriaId: criterion.category };
                         setScores(newScores);
                       }}
                       required
@@ -127,7 +151,7 @@ export default function CreateProjectModal({ handleShow, handleHide, handleAddHo
           </Button>
         </Form>
       </Modal.Body>
-    </Modal>
+    </Modal >
   );
 
 
