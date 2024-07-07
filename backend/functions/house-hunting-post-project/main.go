@@ -164,11 +164,13 @@ func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (
 		Item:      p,
 	}
 
+	itemJson, _ := json.Marshal(item)
+
 	_, err = db.PutItem(ctx, item)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
-			Body:       fmt.Sprintf("Failed to put item: %v\n%v\n%v\n", err, item, ctx),
+			Body:       fmt.Sprintf("Failed to put item: %v\n%v\n%v\n%s\n", err, item, ctx, itemJson),
 		}, nil
 	}
 
