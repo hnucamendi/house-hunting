@@ -64,13 +64,9 @@ export default function HousePage() {
       fetch(url, {
         method: "PUT",
         body: JSON.stringify({
-          houseEntries: [
-            {
-              address: address,
-              scores: scores,
-              notes: notes,
-            }
-          ]
+          address: address,
+          scores: scores,
+          notes: notes,
         }),
         headers: {
           Accept: 'application/json',
