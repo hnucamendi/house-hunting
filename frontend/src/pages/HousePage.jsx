@@ -136,7 +136,7 @@ export default function HousePage() {
                           <Card.Text>Average Score:</Card.Text>
                         </Col>
                         <Col>
-                          {houseEntry.scores.averageScore}
+                          {Number(houseEntry.scores.averageScore.toFixed(2))}
                         </Col>
                         <Card.Text>Notes:</Card.Text>
                       </Row>
