@@ -159,6 +159,8 @@ func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (
 		}, nil
 	}
 
+	pJson, _ := json.Marshal(p)
+
 	item := &dynamodb.PutItemInput{
 		TableName: aws.String("UsersTable"),
 		Item:      p,
@@ -170,7 +172,7 @@ func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
-			Body:       fmt.Sprintf("Failed to put item: %v\n%v\n%v\n%s\n", err, item, ctx, itemJson),
+			Body:       fmt.Sprintf("Failed to put item: %v\n%v\n%v\n%s\n%s\n", err, item, ctx, itemJson, pJson),
 		}, nil
 	}
 
