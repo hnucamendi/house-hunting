@@ -181,9 +181,9 @@ func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (
 				},
 			},
 		},
-		Limit:                aws.Int32(int32(pageSize)),
-		ExclusiveStartKey:    lastEvaluatedKey,
-		ProjectionExpression: aws.String("id, projectId, email, project.id, project.title, project.description"),
+		// Limit:                aws.Int32(int32(pageSize)),
+		// ExclusiveStartKey:    lastEvaluatedKey,
+		// ProjectionExpression: aws.String("id, projectId, email, project.id, project.title, project.description"),
 	}
 
 	out, err := db.Query(ctx, input)
