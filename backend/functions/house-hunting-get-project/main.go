@@ -47,11 +47,6 @@ type JWTPayload struct {
 	Email           string `json:"email"`
 }
 
-type HouseNotes struct {
-	Title string `json:"title"`
-	Note  string `json:"note"`
-}
-
 type HouseScores struct {
 	Score      int    `json:"score"`
 	CriteriaId string `json:"criteriaId"`
@@ -66,7 +61,7 @@ type Criteria struct {
 type HouseEntry struct {
 	Address string        `json:"address"`
 	Scores  []HouseScores `json:"scores"`
-	Notes   []HouseNotes  `json:"notes"`
+	Notes   []string      `json:"notes"`
 }
 
 type Project struct {
