@@ -134,6 +134,9 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 
 	email := token.processJWT()
 	id := generateId(USERID, email)
+	for i := range he.Scores {
+		he.Scores[i].CriteriaId = generateId(CRITERIAID, he.Scores[i].CriteriaId)
+	}
 
 	p, err := dynamodbattribute.Marshal(he)
 	if err != nil {
@@ -144,8 +147,6 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 	}
 
 	db := dynamodb.New(sess)
-
-	fmt.Println("ID:", id, "Project ID:", projectId)
 
 	_, err = db.UpdateItem(&dynamodb.UpdateItemInput{
 		TableName: aws.String("UsersTable"),
