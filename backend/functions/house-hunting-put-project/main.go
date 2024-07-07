@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/json"
@@ -10,13 +11,24 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
-var sess = session.Must(session.NewSession())
+var (
+	db *dynamodb.Client
+)
+
+func init() {
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		log.Fatalf("Failed to load SDK configuration: %v", err)
+	}
+	db = dynamodb.NewFromConfig(cfg)
+}
 
 type IDType string
 
@@ -104,7 +116,7 @@ func generateId(pre IDType, identifier string) string {
 	return fmt.Sprintf("%x", md5.Sum(b))
 }
 
-func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
+func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
 	projectId := event.QueryStringParameters["projectId"]
 	if projectId == "" {
 		return &events.APIGatewayV2HTTPResponse{
@@ -130,7 +142,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 	email := token.processJWT()
 	id := generateId(USERID, email)
 
-	p, err := dynamodbattribute.Marshal(he)
+	p, err := attributevalue.Marshal(he)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
@@ -138,31 +150,31 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
-	db := dynamodb.New(sess)
-
-	_, err = db.UpdateItem(&dynamodb.UpdateItemInput{
+	item := &dynamodb.UpdateItemInput{
 		TableName: aws.String("UsersTable"),
-		Key: map[string]*dynamodb.AttributeValue{
-			"id": {
-				S: aws.String(id),
+		Key: map[string]types.AttributeValue{
+			"id": &types.AttributeValueMemberS{
+				Value: id,
 			},
-			"projectId": {
-				S: aws.String(projectId),
+			"projectId": &types.AttributeValueMemberS{
+				Value: projectId,
 			},
 		},
 		UpdateExpression: aws.String("SET #proj.houseEntries = list_append(if_not_exists(#proj.houseEntries, :empty_list), :h)"),
-		ExpressionAttributeNames: map[string]*string{
-			"#proj": aws.String("project"),
+		ExpressionAttributeNames: map[string]string{
+			"#proj": "project",
 		},
-		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
-			":h": {
-				L: []*dynamodb.AttributeValue{p},
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":h": &types.AttributeValueMemberL{
+				Value: []types.AttributeValue{p},
 			},
-			":empty_list": {
-				L: []*dynamodb.AttributeValue{},
+			":empty_list": &types.AttributeValueMemberL{
+				Value: []types.AttributeValue{},
 			},
 		},
-	})
+	}
+
+	_, err = db.UpdateItem(ctx, item)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
@@ -174,7 +186,6 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		StatusCode: 200,
 		Body:       "Success",
 	}, nil
-
 }
 
 func main() {

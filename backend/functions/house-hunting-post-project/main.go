@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/json"
@@ -10,13 +11,23 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
+	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
-var sess = session.Must(session.NewSession())
+var (
+	db *dynamodb.Client
+)
+
+func init() {
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		log.Fatalf("Failed to load SDK configuration: %v", err)
+	}
+	db = dynamodb.NewFromConfig(cfg)
+}
 
 type IDType string
 
@@ -128,7 +139,7 @@ func (u *User) generateId(pre IDType, identifier string) string {
 	return fmt.Sprintf("%x", md5.Sum(b))
 }
 
-func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
+func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
 	var user User
 	err := json.Unmarshal([]byte(event.Body), &user)
 	if err != nil {
@@ -151,7 +162,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		user.Project.Criteria[i].Id = user.generateId(CRITERIAID, user.Project.Criteria[i].Category)
 	}
 
-	p, err := dynamodbattribute.Marshal(user)
+	p, err := attributevalue.MarshalMap(user)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
@@ -159,12 +170,12 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		}, nil
 	}
 
-	db := dynamodb.New(sess)
-
-	_, err = db.PutItem(&dynamodb.PutItemInput{
+	item := &dynamodb.PutItemInput{
 		TableName: aws.String("UsersTable"),
-		Item:      p.M,
-	})
+		Item:      p,
+	}
+
+	_, err = db.PutItem(ctx, item)
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
@@ -176,7 +187,6 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2H
 		StatusCode: 200,
 		Body:       "Success",
 	}, nil
-
 }
 
 func main() {
