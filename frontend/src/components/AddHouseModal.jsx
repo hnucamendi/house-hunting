@@ -65,7 +65,7 @@ export default function CreateProjectModal({ handleShow, handleHide, handleAddHo
               <div key={index}>
                 <Row >
                   <Col>
-                    {note.note}
+                    {note}
                   </Col>
                   <Col>
                     <Button onClick={() => notes.splice(index, 1)}>Delete Note</Button>
