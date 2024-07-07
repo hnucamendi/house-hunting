@@ -8,6 +8,9 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isTrueL, setIsTrueL] = useState(false)
+  const [isTrueU, setIsTrueU] = useState(false)
+  const [isTrueLW, setIsTrueLW] = useState(false)
   const navigate = useNavigate();
 
 
@@ -70,7 +73,18 @@ export default function Login() {
               id="password"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                if (e.target.value.match(/[a-z]/)) {
+                  setIsTrueLW(true)
+                }
+                if (e.target.value.match(/[A-Z]/)) {
+                  setIsTrueU(true)
+                }
+                if (e.target.value.length >= 8) {
+                  setIsTrueL(true)
+                }
+                setPassword(e.target.value)
+              }}
               placeholder="Password"
               required>
             </Form.Control>
@@ -86,6 +100,11 @@ export default function Login() {
                 placeholder="Confirm Password"
                 required>
               </Form.Control>
+              <Form.Text>Must be 8 characters{isTrueL && isSignUp ? <span>✅</span> : <span>❌</span>}</Form.Text>
+              <br />
+              <Form.Text>Must have uppercase{isTrueU && isSignUp ? <span>✅</span> : <span>❌</span>}</Form.Text>
+              <br />
+              <Form.Text>Must have lowercase {isTrueLW && isSignUp ? <span>✅</span> : <span>❌</span>}</Form.Text>
             </Form.Group>
           )}
           <Button className="btn btn-primary m-2" type="submit">{isSignUp ? "Sign Up" : "Sign In"}</Button>
