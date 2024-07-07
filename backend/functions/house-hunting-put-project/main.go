@@ -110,6 +110,8 @@ func generateId(pre IDType, identifier string) string {
 }
 
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
+	eventString, _ := json.Marshal(event)
+	log.Printf("Processing event: %s", eventString)
 	projectId := event.QueryStringParameters["projectId"]
 	if projectId == "" {
 		return &events.APIGatewayV2HTTPResponse{
