@@ -63,11 +63,11 @@ export default function HousePage() {
     try {
       fetch(url, {
         method: "PUT",
-        body: JSON.stringify({
+        body: {
           address: address,
           scores: scores,
           notes: notes,
-        }),
+        },
         headers: {
           Accept: 'application/json',
           Authorization: `Bearer ${sessionStorage.getItem('idToken')}`
