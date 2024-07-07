@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/md5"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"log"
 	"strings"
@@ -15,13 +16,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	jsoniter "github.com/json-iterator/go"
 )
 
 var (
-	db       *dynamodb.Client
-	json     = jsoniter.ConfigCompatibleWithStandardLibrary
-	pageSize = 20 // Number of items to fetch per page
+	db *dynamodb.Client
 )
 
 func init() {
