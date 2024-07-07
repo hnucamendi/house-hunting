@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signIn, signUp } from "../../utils/authService.js";
+import { Container, Form, Button } from "react-bootstrap";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -46,55 +47,55 @@ export default function Login() {
 
   return (
     <div className="parent">
-      <div className="container" style={{ width: "30%" }}>
+      <Container className="container" style={{ width: "70%" }}>
         <h1 className="m-2">Welcome</h1>
         <h4 className="m-2">
           {isSignUp ? "Sign up to create an account" : "Sign in to your account"}
         </h4>
-        <form onSubmit={isSignUp ? handleSignUp : handleSignIn}>
-          <div className="m-2">
-            <input
+        <Form onSubmit={isSignUp ? handleSignUp : handleSignIn}>
+          <Form.Group>
+            <Form.Control
               className="form-control"
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
-              required
-            />
-          </div>
-          <div className="m-2">
-            <input
+              required>
+            </Form.Control>
+          </Form.Group>
+          <Form.Group>
+            <Form.Control
               className="form-control"
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
-              required
-            />
-          </div>
+              required>
+            </Form.Control>
+          </Form.Group>
           {isSignUp && (
-            <div className="m-2">
-              <input
+            <Form.Group>
+              <Form.Control
                 className="form-control"
                 id="confirmPassword"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm Password"
-                required
-              />
-            </div>
+                required>
+              </Form.Control>
+            </Form.Group>
           )}
-          <button className="btn btn-primary m-2" type="submit">{isSignUp ? "Sign Up" : "Sign In"}</button>
-        </form>
-        <button className="btn btn-light m-2" onClick={() => setIsSignUp(!isSignUp)}>
+          <Button className="btn btn-primary m-2" type="submit">{isSignUp ? "Sign Up" : "Sign In"}</Button>
+        </Form>
+        <Button className="btn btn-light m-2" onClick={() => setIsSignUp(!isSignUp)}>
           {isSignUp
             ? "Already have an account? Sign In"
             : "Need an account? Sign Up"}
-        </button>
-      </div>
-    </div>
+        </Button>
+      </Container>
+    </div >
   );
 }
