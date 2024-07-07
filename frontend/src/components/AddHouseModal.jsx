@@ -128,7 +128,7 @@ export default function CreateProjectModal({ handleShow, handleHide, handleAddHo
                           e.target.value = 0;
                         }
                         const newScores = [...scores];
-                        newScores[index] = { score: Number(e.target.value), criteriaId: criterion.category };
+                        newScores[index] = { score: Number(e.target.value), criteriaId: criterion.id };
                         setScores(newScores);
                       }}
                       required
