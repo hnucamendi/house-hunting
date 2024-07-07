@@ -64,9 +64,7 @@ const LandingPage = () => {
           Accept: 'application/json',
           Authorization: `Bearer ${sessionStorage.getItem('idToken')}`
         }
-      })
-
-      setUploadProjectCount(uploadProjectCount + 1)
+      }).then(() => setUploadProjectCount(uploadProjectCount + 1))
     } catch (error) {
       console.error(`Error creating project: ${error}`)
     }

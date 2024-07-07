@@ -14,6 +14,7 @@ export default function HousePage() {
   useSessionCheck();
   const [userProject, setUserProject] = useState({});
   const [hideAddHouse, setHideAddHouse] = useState(true);
+  const [houseEntryCount, setHouseEntryCount] = useState(0);
   const location = useLocation();
 
   const projectId = location.pathname.split("/")[2];
@@ -49,7 +50,7 @@ export default function HousePage() {
         setUserProject(data);
         calculateAverageScore(data?.project?.houseEntries)
       })
-  }, [url, projectId])
+  }, [url, projectId, houseEntryCount])
 
   const handleShow = () => setHideAddHouse(false);
   const handleHide = () => setHideAddHouse(true);
@@ -77,6 +78,7 @@ export default function HousePage() {
           Authorization: `Bearer ${sessionStorage.getItem('idToken')}`
         }
       })
+        .then(() => setHouseEntryCount(houseEntryCount + 1))
     } catch (error) {
       console.error(`Error adding house: ${error}`)
     }
