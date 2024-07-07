@@ -36,7 +36,7 @@ const LandingPage = () => {
           setUserData(null)
           return
         }
-        setUserData(data)
+        setUserData(data.users)
         return
       });
   }, [url, uploadProjectCount])
