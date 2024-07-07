@@ -71,10 +71,10 @@ type Project struct {
 }
 
 type User struct {
-	Id        string  `json:"id"`
-	ProjectId string  `json:"projectId"`
-	Email     string  `json:"email"`
-	Project   Project `json:"project"`
+	Id        string  `json:"id" dynamodbav:"Id"`
+	ProjectId string  `json:"projectId" dynamodbav:"ProjectId"`
+	Email     string  `json:"email" dynamodbav:"Email"`
+	Project   Project `json:"project" dynamodbav:"Project"`
 }
 
 func (jwt *Token) decodeSegment(seg string) ([]byte, error) {
