@@ -116,21 +116,34 @@ func generateId(pre IDType, identifier string) string {
 	return fmt.Sprintf("%x", md5.Sum(b))
 }
 
+func validateAccess(ctx context.Context, projectId, id string) (bool, error) {
+	item := &dynamodb.QueryInput{
+		TableName:              aws.String("UsersTable"),
+		KeyConditionExpression: aws.String("id = :id AND projectId = :projectId"),
+		ExpressionAttributeValues: map[string]types.AttributeValue{
+			":id":        &types.AttributeValueMemberS{Value: id},
+			":projectId": &types.AttributeValueMemberS{Value: projectId},
+		},
+	}
+
+	res, err := db.Query(ctx, item)
+	if err != nil {
+		return false, err
+	}
+
+	if len(res.Items) == 0 {
+		return false, nil
+	}
+
+	return true, nil
+}
+
 func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
 	projectId := event.QueryStringParameters["projectId"]
 	if projectId == "" {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 400,
 			Body:       "Missing projectId",
-		}, nil
-	}
-
-	var he HouseEntry
-	err := json.Unmarshal([]byte(event.Body), &he)
-	if err != nil {
-		return &events.APIGatewayV2HTTPResponse{
-			StatusCode: 400,
-			Body:       fmt.Sprintf("Failed to parse request: %v", err),
 		}, nil
 	}
 
@@ -141,6 +154,30 @@ func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (
 
 	email := token.processJWT()
 	id := generateId(USERID, email)
+
+	access, err := validateAccess(ctx, projectId, id)
+	if err != nil {
+		return &events.APIGatewayV2HTTPResponse{
+			StatusCode: 500,
+			Body:       fmt.Sprintf("Failed to validate access: %v", err),
+		}, nil
+	}
+
+	if !access {
+		return &events.APIGatewayV2HTTPResponse{
+			StatusCode: 403,
+			Body:       "User does not have access to this project",
+		}, nil
+	}
+
+	var he HouseEntry
+	err = json.Unmarshal([]byte(event.Body), &he)
+	if err != nil {
+		return &events.APIGatewayV2HTTPResponse{
+			StatusCode: 400,
+			Body:       fmt.Sprintf("Failed to parse request: %v", err),
+		}, nil
+	}
 
 	p, err := attributevalue.Marshal(he)
 	if err != nil {
