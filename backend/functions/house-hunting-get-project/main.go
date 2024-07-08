@@ -179,13 +179,6 @@ func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (
 		}, nil
 	}
 
-	if out.Item["id"].(*types.AttributeValueMemberS).Value != id {
-		return &events.APIGatewayV2HTTPResponse{
-			StatusCode: 403,
-			Body:       `{"message": "Forbidden"}`,
-		}, nil
-	}
-
 	var user User
 	err = attributevalue.UnmarshalMap(out.Item, &user)
 	if err != nil {
