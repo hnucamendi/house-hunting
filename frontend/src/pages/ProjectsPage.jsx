@@ -44,8 +44,8 @@ const LandingPage = () => {
   const handleShow = () => setHideCreateProject(false)
   const handleHide = () => setHideCreateProject(true)
 
-  const handleCreateProject = (e) => {
-    if (e.projectTitle === "" || e.projectDescription === "" || e.projectCriteria.length === 0) {
+  const handleCreateProject = (title, description, criteria) => {
+    if (title === "" || description === "" || criteria.length === 0) {
       alert("Please fill out all fields")
       return
     }
@@ -55,9 +55,9 @@ const LandingPage = () => {
         method: "POST",
         body: JSON.stringify({
           project: {
-            title: e.projectTitle,
-            description: e.projectDescription,
-            criteria: e.projectCriteria,
+            title: title,
+            description: description,
+            criteria: criteria,
           }
         }),
         headers: {

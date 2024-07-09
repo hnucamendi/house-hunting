@@ -6,65 +6,22 @@ import {
   Button,
   Row,
   Col,
-  Container
+  Container,
+  Dropdown,
 } from 'react-bootstrap';
 
 export default function CreateProjectModal({ handleShow, handleHide, handleCreateProject }) {
-  const [formData, setFormData] = useState({
-    projectTitle: '',
-    projectDescription: '',
-    projectCriteria: [
-      {
-        category: '',
-        details: {},
-      }
-    ]
-  });
-  const [isProjectTitleFilled, setIsProjectTitleFilled] = useState(false);
-  const [isProjectDescriptionFilled, setIsProjectDescriptionFilled] = useState(false);
-  const [isProjectCriteriaCategory, setIsProjectCriteriaCategory] = useState(false);
-  const [isProjectCriteriaKey, setIsProjectCriteriaKey] = useState(false);
-  const [isProjectCriteriaValue, setIsProjectCriteriaValue] = useState(false);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [criteria, setCriteria] = useState([]);
+  const [criteriaCategory, setCriteriaCategory] = useState("");
+  const [criteriaValue, setCriteriaValue] = useState([]);
+  const [criteriaValues, setCriteriaValues] = useState([]);
 
-  const isFormFilled = isProjectCriteriaCategory && isProjectCriteriaKey && isProjectCriteriaValue && isProjectDescriptionFilled && isProjectTitleFilled;
+  const categories = ["Bedroom", "Bathroom", "Kitchen", "Living Room", "Dining Room", "Garage", "Yard", "Outdoors", "Basement", "Attic", "Laundry Room", "Office", "Gym", "Storage", "Other"]
 
-  const handleChange = (e, catIndex, critIndex, field, type) => {
-    const { value } = e.target;
-    const updatedFormData = { ...formData };
+  const isFormFilled = title && description && criteria.length > 0;
 
-    if (type === 'projectTitle' || type === 'projectDescription') {
-      updatedFormData[type] = value;
-    } else if (type === 'category') {
-      updatedFormData.projectCriteria[catIndex].category = value;
-    } else if (type === 'criteriaKey') {
-      const oldKey = Object.keys(updatedFormData.projectCriteria[catIndex].details)[critIndex];
-      const updatedCriteria = { ...updatedFormData.projectCriteria[catIndex].details };
-      delete updatedCriteria[oldKey];
-      updatedCriteria[value] = updatedFormData.projectCriteria[catIndex].details[oldKey];
-      updatedFormData.projectCriteria[catIndex].details = updatedCriteria;
-    } else if (type === 'criteriaValue') {
-      const key = Object.keys(updatedFormData.projectCriteria[catIndex].details)[critIndex];
-      updatedFormData.projectCriteria[catIndex].details[key] = value;
-    }
-
-    setFormData(updatedFormData);
-  };
-
-  const addCategory = () => {
-    setFormData({
-      ...formData,
-      projectCriteria: [...formData.projectCriteria, { category: '', details: {} }]
-    });
-  };
-
-  const addCriteria = (catIndex) => {
-    const updatedCategories = [...formData.projectCriteria];
-    updatedCategories[catIndex].details = { ...updatedCategories[catIndex].details, '': '' };
-    setFormData({
-      ...formData,
-      projectCriteria: updatedCategories
-    });
-  };
 
   return (
     <Modal show={handleShow} onHide={handleHide}>
@@ -75,10 +32,7 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
       </Modal.Header>
 
       <Modal.Body>
-        <Form onSubmit={(e) => {
-          e.preventDefault();
-          handleCreateProject(formData);
-        }}>
+        <Form>
           <Modal.Title>
             <h3>Project</h3>
           </Modal.Title>
@@ -86,113 +40,109 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
             <Form.Label>Title</Form.Label>
             <Form.Control
               type="text"
-              value={formData.projectTitle}
+              value={title}
               onChange={(e) => {
-                setIsProjectTitleFilled(false);
-                handleChange(e, null, null, 'projectTitle', 'projectTitle')
-                if (e.target.value !== "") {
-                  setIsProjectTitleFilled(true);
-                }
+                setTitle(e.target.value)
               }}
-              required
             />
           </Form.Group>
           <Form.Group>
             <Form.Label>Description</Form.Label>
             <Form.Control
               type="text"
-              value={formData.projectDescription}
+              value={description}
               onChange={(e) => {
-                setIsProjectDescriptionFilled(false);
-                handleChange(e, null, null, 'projectDescription', 'projectDescription')
-                if (e.target.value !== "") {
-                  setIsProjectDescriptionFilled(true);
-                }
+                setDescription(e.target.value)
               }}
-              required
             />
           </Form.Group>
           <Modal.Title>
             <h3>Project Criteria</h3>
           </Modal.Title>
-          {formData.projectCriteria.map((item, catIndex) => (
-            <Container key={catIndex}>
+
+          <Container>
+            <Row>
+              <Col>
+                <Form.Group>
+                  <Form.Label>Category</Form.Label>
+                  <Dropdown>
+                    <Dropdown.Toggle variant="primary" id="dropdown-basic">
+                      {criteriaCategory || "Select Category"}
+                    </Dropdown.Toggle>
+                    <Dropdown.Menu>
+                      {categories.map((category, i) => (
+                        <Dropdown.Item key={i} onClick={() => setCriteriaCategory(category)}>{category}</Dropdown.Item>
+                      ))}
+                    </Dropdown.Menu>
+                  </Dropdown>
+                </Form.Group>
+              </Col>
+              <Col>
+                <Form.Group>
+                  <Form.Label>Value</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="value"
+                    value={criteriaValue}
+                    onChange={(e) => {
+                      const newCriteriaValue = e.target.value;
+                      setCriteriaValues([...criteriaValue, newCriteriaValue]);
+                    }}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setCriteria([
+                  ...criteria,
+                  {
+                    [criteriaCategory]: criteriaValues
+                  }
+                ]);
+                setCriteriaCategory("");
+                setCriteriaValue("");
+              }}
+            >
+              Add Criteria
+            </Button>
+          </Container>
+          {criteria.map((c, i) => (
+            <div key={i}>
               <Row>
                 <Col>
-                  <Form.Group>
-                    <Form.Label>Category</Form.Label>
-                    <Form.Control
-                      type="text"
-                      name="category"
-                      value={item.category}
-                      onChange={(e) => {
-                        setIsProjectCriteriaCategory(false);
-                        handleChange(e, catIndex, null, 'category', 'category')
-                        if (e.target.value !== "") {
-                          setIsProjectCriteriaCategory(true);
-                        }
-                      }}
-                      required
-                    />
-                  </Form.Group>
+                  {c.category}
+                </Col>
+                <Col>
+                  {Object.keys(c.details).map((detail, j) => (
+                    <div key={j}>
+                      {c.details[detail]}
+                    </div>
+                  ))}
+                </Col>
+                <Col>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => {
+                      criteria.splice(i, 1);
+                      setCriteria([...criteria]);
+                    }}>
+                    Delete Criteria
+                  </Button>
                 </Col>
               </Row>
-
-              {Object.entries(item.details).map(([key, value], critIndex) => (
-                <Row key={critIndex}>
-                  <Col>
-                    <Form.Group>
-                      <Form.Label>Item</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="key"
-                        value={key}
-                        onChange={(e) => {
-                          setIsProjectCriteriaKey(false);
-                          handleChange(e, catIndex, critIndex, 'criteriaKey', 'criteriaKey')
-                          if (e.target.value !== "") {
-                            setIsProjectCriteriaKey(true);
-                          }
-                        }}
-                        required
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col>
-                    <Form.Group>
-                      <Form.Label>Value</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="value"
-                        value={value}
-                        onChange={(e) => {
-                          setIsProjectCriteriaValue(false);
-                          handleChange(e, catIndex, critIndex, 'criteriaValue', 'criteriaValue')
-                          if (e.target.value !== "") {
-                            setIsProjectCriteriaValue(true);
-                          }
-                        }}
-                        required
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-              ))}
-
-              <Button variant="secondary" onClick={() => addCriteria(catIndex)}>
-                Add Criteria
-              </Button>
-            </Container>
+            </div>
           ))}
-          <Button variant="secondary" onClick={addCategory}>
-            Add Category
-          </Button>
-          <Button disabled={!isFormFilled} onClick={(e) => {
-            e.preventDefault();
-            handleCreateProject(formData)
-            handleHide();
-          }}
+          <Button
+            disabled={!isFormFilled}
             type="submit"
+            onClick={(e) => {
+              e.preventDefault();
+              handleCreateProject(title, description, criteria);
+              handleHide();
+            }}
           >
             Create!
           </Button>

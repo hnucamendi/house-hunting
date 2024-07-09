@@ -59,9 +59,8 @@ type JWTPayload struct {
 }
 
 type Criteria struct {
-	Id       string            `json:"id"`
-	Category string            `json:"category"`
-	Details  map[string]string `json:"details"`
+	Id      string              `json:"id"`
+	Details map[string][]string `json:"details"`
 }
 
 type Project struct {
@@ -148,7 +147,9 @@ func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (
 	user.ProjectId = user.generateId(PROJECTID, user.Project.Title)
 
 	for i := range user.Project.Criteria {
-		user.Project.Criteria[i].Id = user.generateId(CRITERIAID, user.Project.Criteria[i].Category)
+		for k := range user.Project.Criteria[i].Details {
+			user.Project.Criteria[i].Id = user.generateId(CRITERIAID, k)
+		}
 	}
 
 	p, err := attributevalue.MarshalMap(user)
