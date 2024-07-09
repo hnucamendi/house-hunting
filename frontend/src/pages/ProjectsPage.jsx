@@ -45,29 +45,30 @@ const LandingPage = () => {
   const handleHide = () => setHideCreateProject(true)
 
   const handleCreateProject = (title, description, criteria) => {
-    if (title === "" || description === "" || criteria.length === 0) {
-      alert("Please fill out all fields")
-      return
-    }
+    console.log(title, description, criteria)
+    // if (title === "" || description === "" || criteria.length === 0) {
+    //   alert("Please fill out all fields")
+    //   return
+    // }
 
-    try {
-      fetch('https://api.hnucamendi.net/project', {
-        method: "POST",
-        body: JSON.stringify({
-          project: {
-            title: title,
-            description: description,
-            criteria: criteria,
-          }
-        }),
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${sessionStorage.getItem('idToken')}`
-        }
-      }).then(() => setUploadProjectCount(uploadProjectCount + 1))
-    } catch (error) {
-      console.error(`Error creating project: ${error}`)
-    }
+    // try {
+    //   fetch('https://api.hnucamendi.net/project', {
+    //     method: "POST",
+    //     body: JSON.stringify({
+    //       project: {
+    //         title: title,
+    //         description: description,
+    //         criteria: criteria,
+    //       }
+    //     }),
+    //     headers: {
+    //       Accept: 'application/json',
+    //       Authorization: `Bearer ${sessionStorage.getItem('idToken')}`
+    //     }
+    //   }).then(() => setUploadProjectCount(uploadProjectCount + 1))
+    // } catch (error) {
+    //   console.error(`Error creating project: ${error}`)
+    // }
   }
 
   if (userData !== null && userData.length > 0) {

@@ -16,12 +16,42 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
   const [criteria, setCriteria] = useState([]);
   const [criteriaCategory, setCriteriaCategory] = useState("");
   const [criteriaValue, setCriteriaValue] = useState([]);
-  const [criteriaValues, setCriteriaValues] = useState([]);
 
   const categories = ["Bedroom", "Bathroom", "Kitchen", "Living Room", "Dining Room", "Garage", "Yard", "Outdoors", "Basement", "Attic", "Laundry Room", "Office", "Gym", "Storage", "Other"]
 
   const isFormFilled = title && description && criteria.length > 0;
 
+  const addCriteria = () => {
+    if (criteriaCategory && criteriaValue) {
+      setCriteria([
+        ...criteria,
+        {
+          id: "",
+          details: {
+            [criteriaCategory]: [criteriaValue]
+          }
+        }
+      ]);
+      setCriteriaCategory("");
+      setCriteriaValue("");
+    }
+  };
+
+  const removeCriteria = (index) => {
+    const newCriteria = [...criteria];
+    newCriteria.splice(index, 1);
+    setCriteria(newCriteria);
+  };
+
+  const addValueToCriteria = (index) => {
+    if (criteriaValue) {
+      const newCriteria = [...criteria];
+      const category = Object.keys(newCriteria[index].details)[0];
+      newCriteria[index].details[category].push(criteriaValue);
+      setCriteria(newCriteria);
+      setCriteriaValue("");
+    }
+  };
 
   return (
     <Modal show={handleShow} onHide={handleHide}>
@@ -59,7 +89,6 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
           <Modal.Title>
             <h3>Project Criteria</h3>
           </Modal.Title>
-
           <Container>
             <Row>
               <Col>
@@ -84,55 +113,38 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
                     type="text"
                     name="value"
                     value={criteriaValue}
-                    onChange={(e) => {
-                      const newCriteriaValue = e.target.value;
-                      setCriteriaValues([...criteriaValue, newCriteriaValue]);
-                    }}
+                    onChange={(e) => setCriteriaValue(e.target.value)}
                   />
                 </Form.Group>
               </Col>
             </Row>
             <Button
               variant="secondary"
-              onClick={() => {
-                setCriteria([
-                  ...criteria,
-                  {
-                    [criteriaCategory]: criteriaValues
-                  }
-                ]);
-                setCriteriaCategory("");
-                setCriteriaValue("");
-              }}
+              onClick={addCriteria}
             >
               Add Criteria
             </Button>
           </Container>
           {criteria.map((c, i) => (
             <div key={i}>
-              <Row>
-                <Col>
-                  {c.category}
-                </Col>
-                <Col>
-                  {Object.keys(c.details).map((detail, j) => (
-                    <div key={j}>
-                      {c.details[detail]}
-                    </div>
-                  ))}
-                </Col>
-                <Col>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={() => {
-                      criteria.splice(i, 1);
-                      setCriteria([...criteria]);
-                    }}>
-                    Delete Criteria
-                  </Button>
-                </Col>
-              </Row>
+              <h4>{Object.keys(c.details)[0]}</h4>
+              <ul>
+                {c.details[Object.keys(c.details)[0]].map((value, j) => (
+                  <li key={j}>{value}</li>
+                ))}
+              </ul>
+              <Form.Control
+                type="text"
+                placeholder="Add new value"
+                value={criteriaValue}
+                onChange={(e) => setCriteriaValue(e.target.value)}
+              />
+              <Button variant="secondary" onClick={() => addValueToCriteria(i)}>
+                Add Value
+              </Button>
+              <Button variant="danger" onClick={() => removeCriteria(i)}>
+                Remove Criteria
+              </Button>
             </div>
           ))}
           <Button
