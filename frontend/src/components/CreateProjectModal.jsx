@@ -15,6 +15,7 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
   const [description, setDescription] = useState("");
   const [criteria, setCriteria] = useState([]);
   const [criteriaCategory, setCriteriaCategory] = useState("");
+  const [categoryValue, setCategoryValue] = useState([]);
   const [criteriaValue, setCriteriaValue] = useState([]);
 
   const categories = ["Bedroom", "Bathroom", "Kitchen", "Living Room", "Dining Room", "Garage", "Yard", "Outdoors", "Basement", "Attic", "Laundry Room", "Office", "Gym", "Storage", "Other"]
@@ -22,18 +23,18 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
   const isFormFilled = title && description && criteria.length > 0;
 
   const addCriteria = () => {
-    if (criteriaCategory && criteriaValue) {
+    if (criteriaCategory && categoryValue) {
       setCriteria([
         ...criteria,
         {
           id: "",
           details: {
-            [criteriaCategory]: [criteriaValue]
+            [criteriaCategory]: [categoryValue]
           }
         }
       ]);
       setCriteriaCategory("");
-      setCriteriaValue("");
+      setCategoryValue("");
     }
   };
 
@@ -43,13 +44,13 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
     setCriteria(newCriteria);
   };
 
-  const addValueToCriteria = (index) => {
+  const addValueToCategory = (index) => {
     if (criteriaValue) {
       const newCriteria = [...criteria];
       const category = Object.keys(newCriteria[index].details)[0];
       newCriteria[index].details[category].push(criteriaValue);
       setCriteria(newCriteria);
-      setCriteriaValue("");
+      setCategoryValue("");
     }
   };
 
@@ -112,8 +113,8 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
                   <Form.Control
                     type="text"
                     name="value"
-                    value={criteriaValue}
-                    onChange={(e) => setCriteriaValue(e.target.value)}
+                    value={categoryValue}
+                    onChange={(e) => setCategoryValue(e.target.value)}
                   />
                 </Form.Group>
               </Col>
@@ -122,7 +123,7 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
               variant="secondary"
               onClick={addCriteria}
             >
-              Add Criteria
+              Add Category
             </Button>
           </Container>
           {criteria.map((c, i) => (
@@ -139,8 +140,8 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
                 value={criteriaValue}
                 onChange={(e) => setCriteriaValue(e.target.value)}
               />
-              <Button variant="secondary" onClick={() => addValueToCriteria(i)}>
-                Add Value
+              <Button variant="secondary" onClick={() => addValueToCategory(i)}>
+                Add Criteria
               </Button>
               <Button variant="danger" onClick={() => removeCriteria(i)}>
                 Remove Criteria

@@ -45,7 +45,6 @@ const LandingPage = () => {
   const handleHide = () => setHideCreateProject(true)
 
   const handleCreateProject = (title, description, criteria) => {
-    console.log(title, description, criteria)
     if (title === "" || description === "" || criteria.length === 0) {
       alert("Please fill out all fields")
       return

@@ -48,7 +48,7 @@ export default function HousePage() {
       .then((response) => response.json())
       .then((data) => {
         setUserProject(data);
-        calculateAverageScore(data?.project?.houseEntries)
+        calculateAverageScore(data?.project?.houseEntries || [])
       })
   }, [url, projectId, houseEntryCount])
 
@@ -87,10 +87,11 @@ export default function HousePage() {
   const mapCriteria = useMemo(() => {
     const map = {};
     userProject?.project?.criteria.forEach((c) => {
-      map[c.id] = c.category;
+      map[c.id] = Object.keys(c.details)[0];
     })
     return map;
   }, [userProject?.project?.criteria])
+
 
   if (userProject !== null) {
     return (

@@ -40,10 +40,8 @@ export const useSessionCheck = () => {
     const checkSession = async () => {
       const isValid = await checkTokenValidity();
       if (!isValid) {
-        console.log('Session is not valid:', isValid)
         navigate('/login');
       }
-      console.log('Session is valid:', isValid)
     };
 
     checkSession();
@@ -92,7 +90,6 @@ export const signUp = async (email, password) => {
 
   const command = new SignUpCommand(params);
   const response = await cognitoClient.send(command);
-  console.log(`Sign up success ${response}`);
   return response;
 };
 
