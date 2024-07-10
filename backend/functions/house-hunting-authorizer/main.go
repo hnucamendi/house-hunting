@@ -1,15 +1,19 @@
 package main
 
 import (
+	"crypto/rsa"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/big"
+	"net/http"
 	"strings"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type JWTPayload struct {
@@ -28,6 +32,19 @@ type JWTPayload struct {
 	Email           string `json:"email"`
 }
 
+type Key struct {
+	Alg string `json:"alg"`
+	E   string `json:"e"`
+	Kid string `json:"kid"`
+	Kty string `json:"kty"`
+	N   string `json:"n"`
+	Use string `json:"use"`
+}
+
+type PublicKeys struct {
+	Keys []Key `json:"keys"`
+}
+
 func generateAllow() *events.APIGatewayV2CustomAuthorizerSimpleResponse {
 	return &events.APIGatewayV2CustomAuthorizerSimpleResponse{
 		IsAuthorized: true,
@@ -40,29 +57,86 @@ func generateDeny() *events.APIGatewayV2CustomAuthorizerSimpleResponse {
 	}
 }
 
-func decodeSegment(seg string) ([]byte, error) {
-	if l := len(seg) % 4; l != 0 {
-		seg += strings.Repeat("=", 4-l)
+func parseToken(tokenString string) (*jwt.Token, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		kid, ok := token.Header["kid"].(string)
+		if !ok {
+			return nil, fmt.Errorf("kid header not found")
+		}
+
+		keys, err := getPublicKey()
+		if err != nil {
+			return nil, err
+		}
+
+		var publicKey *rsa.PublicKey
+		for _, key := range keys.Keys {
+			if key.Kid == kid {
+				publicKey, err = convertKey(key)
+				if err != nil {
+					return nil, err
+				}
+				break
+			}
+		}
+
+		if publicKey == nil {
+			return nil, fmt.Errorf("unable to find appropriate key")
+		}
+
+		return publicKey, nil
+	})
+
+	if err != nil {
+		return nil, err
 	}
-	return base64.URLEncoding.DecodeString(seg)
+
+	return token, nil
 }
 
-func parseJWT(token string) (JWTPayload, error) {
-	parts := strings.Split(token, ".")
-	if len(parts) != 3 {
-		return JWTPayload{}, fmt.Errorf("token contains an invalid number of segments")
-	}
-
-	payloadBytes, err := decodeSegment(parts[1])
+func getPublicKey() (*PublicKeys, error) {
+	url := "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_JfP0nnpWY/.well-known/jwks.json"
+	resp, err := http.Get(url)
 	if err != nil {
-		return JWTPayload{}, fmt.Errorf("failed to decode JWT payload: %v", err)
+		log.Printf("Failed to get public key: %v", err)
+		return nil, err
 	}
-	var payload JWTPayload
-	if err := json.Unmarshal(payloadBytes, &payload); err != nil {
-		return JWTPayload{}, fmt.Errorf("failed to unmarshal JWT payload: %v", err)
+	defer resp.Body.Close()
+
+	var keys PublicKeys
+	if err := json.NewDecoder(resp.Body).Decode(&keys); err != nil {
+		log.Printf("Failed to decode public key: %v", err)
+		return nil, err
 	}
 
-	return payload, nil
+	return &keys, nil
+}
+
+func convertKey(key Key) (*rsa.PublicKey, error) {
+	// Decode the base64 encoded modulus and exponent
+	nBytes, err := base64.RawURLEncoding.DecodeString(key.N)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode modulus: %v", err)
+	}
+	eBytes, err := base64.RawURLEncoding.DecodeString(key.E)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode exponent: %v", err)
+	}
+
+	// Convert the modulus bytes to a big integer
+	n := new(big.Int).SetBytes(nBytes)
+
+	// Convert the exponent bytes to an integer
+	var e int
+	for i := 0; i < len(eBytes); i++ {
+		e = e*256 + int(eBytes[i])
+	}
+
+	return &rsa.PublicKey{N: n, E: e}, nil
 }
 
 func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2CustomAuthorizerSimpleResponse, error) {
@@ -74,24 +148,51 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2C
 
 	auth := strings.TrimSpace(authBearer)
 
-	p, err := parseJWT(auth)
+	token, err := parseToken(auth)
 	if err != nil {
 		log.Printf("Failed to parse JWT")
 		return generateDeny(), nil
 	}
 
-	if p.Exp < time.Now().Unix() {
+	if !token.Valid {
+		log.Printf("Invalid token")
+		return generateDeny(), nil
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		log.Printf("Failed to parse claims")
+		return generateDeny(), nil
+	}
+
+	if claims["iss"] != "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_JfP0nnpWY" {
+		log.Println("Invalid issuer")
+		return generateDeny(), nil
+	}
+
+	if claims["aud"] != "us-east-1_JfP0nnpWY" {
+		log.Println("Invalid audience")
+		return generateDeny(), nil
+	}
+
+	if claims["token_use"] != "id" {
+		log.Println("Invalid token use")
+		return generateDeny(), nil
+	}
+
+	exp, ok := claims["exp"].(float64)
+	if !ok || int64(exp) < time.Now().Unix() {
 		log.Println("Token expired")
 		return generateDeny(), nil
 	}
 
-	if !p.EmailVerified {
+	emailVerified, ok := claims["email_verified"].(bool)
+	if !ok || !emailVerified {
 		log.Println("Email not verified")
 		return generateDeny(), nil
 	}
 
-	log.Printf("user authorized")
-
+	log.Printf("User authorized")
 	return generateAllow(), nil
 }
 
