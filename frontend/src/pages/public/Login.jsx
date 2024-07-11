@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signIn, signUp } from "../../utils/authService.js";
 import { Container, Form, Button } from "react-bootstrap";
+import "../../styles/login.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -48,16 +49,22 @@ export default function Login() {
   };
 
   return (
-    <div className="parent">
-      <Container className="container" style={{ width: "70%" }}>
-        <h1 className="m-2">Welcome</h1>
-        <h4 className="m-2">
+    <Container>
+      <div className="login-box">
+        <div className="logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </div>
+        <h1>Welcome</h1>
+        <h4>
           {isSignUp ? "Sign up to create an account" : "Sign in to your account"}
         </h4>
         <Form onSubmit={isSignUp ? handleSignUp : handleSignIn}>
-          <Form.Group>
+          <Form.Group className="input-group">
             <Form.Control
-              className="form-control"
               id="email"
               type="email"
               value={email}
@@ -65,10 +72,13 @@ export default function Login() {
               placeholder="Email"
               required>
             </Form.Control>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
           </Form.Group>
-          <Form.Group>
+          <Form.Group className="input-group">
             <Form.Control
-              className="form-control"
               id="password"
               type="password"
               value={password}
@@ -87,11 +97,14 @@ export default function Login() {
               placeholder="Password"
               required>
             </Form.Control>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
           </Form.Group>
           {isSignUp && (
             <Form.Group>
               <Form.Control
-                className="form-control"
                 id="confirmPassword"
                 type="password"
                 value={confirmPassword}
@@ -106,14 +119,17 @@ export default function Login() {
               <Form.Text>Must have lowercase {isTrueLW && isSignUp ? <span>✅</span> : <span>❌</span>}</Form.Text>
             </Form.Group>
           )}
-          <Button className="btn btn-primary m-2" type="submit">{isSignUp ? "Sign Up" : "Sign In"}</Button>
+          <Button type="submit">{isSignUp ? "Sign Up" : "Sign In"}</Button>
         </Form>
-        <Button className="btn btn-light m-2" onClick={() => setIsSignUp(!isSignUp)}>
-          {isSignUp
-            ? "Already have an account? Sign In"
-            : "Need an account? Sign Up"}
-        </Button>
-      </Container>
-    </div >
+        <div className="signup-link">
+
+          {
+            isSignUp
+              ? <p>Already have an account? <Button onClick={() => setIsSignUp(!isSignUp)}>Sign In</Button></p>
+              : <p>Need an account? <Button onClick={() => setIsSignUp(!isSignUp)}>Sign Up</Button></p>
+          }
+        </div>
+      </div>
+    </Container>
   );
 }
