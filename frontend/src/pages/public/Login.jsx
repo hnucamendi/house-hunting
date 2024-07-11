@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signIn, signUp } from "../../utils/authService.js";
-import { Container, Form, Button } from "react-bootstrap";
 import "../../styles/login.css";
 
 export default function Login() {
@@ -49,7 +48,7 @@ export default function Login() {
   };
 
   return (
-    <Container>
+    <div>
       <div className="login-box">
         <div className="logo">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -62,23 +61,23 @@ export default function Login() {
         <h4>
           {isSignUp ? "Sign up to create an account" : "Sign in to your account"}
         </h4>
-        <Form onSubmit={isSignUp ? handleSignUp : handleSignIn}>
-          <Form.Group className="input-group">
-            <Form.Control
+        <form onSubmit={isSignUp ? handleSignUp : handleSignIn}>
+          <label className="input-group">
+            <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
               required>
-            </Form.Control>
+            </input>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
               <polyline points="22,6 12,13 2,6"></polyline>
             </svg>
-          </Form.Group>
-          <Form.Group className="input-group">
-            <Form.Control
+          </label>
+          <label className="input-group">
+            <input
               id="password"
               type="password"
               value={password}
@@ -96,40 +95,40 @@ export default function Login() {
               }}
               placeholder="Password"
               required>
-            </Form.Control>
+            </input>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
               <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
             </svg>
-          </Form.Group>
+          </label>
           {isSignUp && (
-            <Form.Group>
-              <Form.Control
+            <label>
+              <input
                 id="confirmPassword"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm Password"
                 required>
-              </Form.Control>
-              <Form.Text>Must be 8 characters{isTrueL && isSignUp ? <span>✅</span> : <span>❌</span>}</Form.Text>
+              </input>
+              <p>Must be 8 characters{isTrueL && isSignUp ? <span>✅</span> : <span>❌</span>}</p>
               <br />
-              <Form.Text>Must have uppercase{isTrueU && isSignUp ? <span>✅</span> : <span>❌</span>}</Form.Text>
+              <p>Must have uppercase{isTrueU && isSignUp ? <span>✅</span> : <span>❌</span>}</p>
               <br />
-              <Form.Text>Must have lowercase {isTrueLW && isSignUp ? <span>✅</span> : <span>❌</span>}</Form.Text>
-            </Form.Group>
+              <p>Must have lowercase {isTrueLW && isSignUp ? <span>✅</span> : <span>❌</span>}</p>
+            </label>
           )}
-          <Button type="submit">{isSignUp ? "Sign Up" : "Sign In"}</Button>
-        </Form>
+          <button type="submit">{isSignUp ? "Sign Up" : "Sign In"}</button>
+        </form>
         <div className="signup-link">
 
           {
             isSignUp
-              ? <p>Already have an account? <Button onClick={() => setIsSignUp(!isSignUp)}>Sign In</Button></p>
-              : <p>Need an account? <Button onClick={() => setIsSignUp(!isSignUp)}>Sign Up</Button></p>
+              ? <p>Already have an account? <button onClick={() => setIsSignUp(!isSignUp)}>Sign In</button></p>
+              : <p>Need an account? <button onClick={() => setIsSignUp(!isSignUp)}>Sign Up</button></p>
           }
         </div>
       </div>
-    </Container>
+    </div>
   );
 }

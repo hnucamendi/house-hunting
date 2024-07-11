@@ -1,12 +1,5 @@
 import { useLocation } from "react-router-dom"
 import { useSessionCheck } from "../utils/authService"
-import {
-  Container,
-  Card,
-  Button,
-  Row,
-  Col,
-} from "react-bootstrap"
 import AddHouseModal from "../components/AddHouseModal"
 import { useEffect, useState, useMemo } from "react"
 
@@ -95,14 +88,14 @@ export default function HousePage() {
 
   if (userProject !== null) {
     return (
-      <Container>
-        <Card>
-          <Card.Body key={userProject?.projectId}>
-            <Card.Title>{userProject?.project?.title}</Card.Title>
-            <Card.Text>{userProject?.project?.description}</Card.Text>
-            <Button onClick={() => setHideAddHouse(!hideAddHouse)}>
+      <div>
+        <div>
+          <div key={userProject?.projectId}>
+            <p>{userProject?.project?.title}</p>
+            <p>{userProject?.project?.description}</p>
+            <button onClick={() => setHideAddHouse(!hideAddHouse)}>
               Add House
-            </Button>
+            </button>
             {
               hideAddHouse ? null :
                 <AddHouseModal
@@ -112,37 +105,25 @@ export default function HousePage() {
                   criteria={userProject?.project?.criteria}
                 />
             }
-          </Card.Body>
+          </div>
           {
             userProject?.project?.houseEntries != null
-              ? <Card.Body>
+              ? <div>
                 {userProject?.project?.houseEntries.map((houseEntry, index) => (
-                  <Card key={index}>
-                    <Card.Body>
-                      <Card.Title>{houseEntry.address}</Card.Title>
+                  <div key={index}>
+                    <div>
+                      <p>{houseEntry.address}</p>
                       {
                         houseEntry.scores.map((score, index) => (
                           <div key={index}>
-                            <Row>
-                              <Col>
-                                {mapCriteria[score.criteriaId]}
-                              </Col>
-                              <Col>
-                                {score.score}
-                              </Col>
-                            </Row>
+                            {mapCriteria[score.criteriaId]}
+                            {score.score}
                           </div>
                         ))
                       }
-                      <Row>
-                        <Col>
-                          <Card.Text>Average Score:</Card.Text>
-                        </Col>
-                        <Col>
-                          {Number(houseEntry.scores.averageScore.toFixed(2))}
-                        </Col>
-                        <Card.Text>Notes:</Card.Text>
-                      </Row>
+                      <p>Average Score:</p>
+                      {Number(houseEntry.scores.averageScore.toFixed(2))}
+                      <p>Notes:</p>
                       {
                         houseEntry?.notes.map((note, index) => (
                           <div key={index}>
@@ -150,15 +131,15 @@ export default function HousePage() {
                           </div>
                         ))
                       }
-                    </Card.Body>
-                  </Card>
+                    </div>
+                  </div>
                 ))}
-              </Card.Body>
-              : <Card.Body>
-                <Card.Text>No house entries found</Card.Text>
-                <Button onClick={() => setHideAddHouse(!hideAddHouse)}>
+              </div>
+              : <div>
+                <p>No house entries found</p>
+                <button onClick={() => setHideAddHouse(!hideAddHouse)}>
                   Add House
-                </Button>
+                </button>
                 {
                   hideAddHouse ? null :
                     <AddHouseModal
@@ -168,16 +149,16 @@ export default function HousePage() {
                       criteria={userProject?.project?.criteria}
                     />
                 }
-              </Card.Body>
+              </div>
           }
-        </Card>
-      </Container>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container className="projects-page">
+    <div className="projects-page">
       <h1>Loading...</h1>
-    </Container>
+    </div>
   )
 }

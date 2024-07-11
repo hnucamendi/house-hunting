@@ -1,10 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useSessionCheck } from '../utils/authService';
-import {
-  Card,
-  Button,
-  Container,
-} from 'react-bootstrap';
 import CreateProjectModal from '../components/CreateProjectModal';
 import Project from '../components/Project';
 import "../styles/pages/projectsPage.css";
@@ -72,12 +67,12 @@ const LandingPage = () => {
 
   if (userData !== null && userData.length > 0) {
     return (
-      <Container>
+      <div>
         <h1>Your Projects</h1>
-        <Button
+        <button
           onClick={() => setHideCreateProject(!hideCreateProject)}>
           Create New Project
-        </Button>
+        </button>
         {
           hideCreateProject ? null :
             <CreateProjectModal
@@ -86,29 +81,29 @@ const LandingPage = () => {
               handleCreateProject={handleCreateProject}
             />
         }
-        <Card className="projects-page">
-          <Card.Body>
+        <div className="projects-page">
+          <div>
             {userData.map((p, i) => (
               <Project key={userData?.projectId || i}>
-                <Card.Title>{p.project.title}</Card.Title>
-                <Card.Subtitle>{p.project.description}</Card.Subtitle>
-                <Button variant="primary" href={`/projects/${p.projectId}`}>View Project</Button>
+                <p>{p.project.title}</p>
+                <pe>{p.project.description}</pe>
+                <button href={`/projects/${p.projectId}`}>View Project</button>
               </Project>
             ))}
-          </Card.Body>
-        </Card>
-      </Container>
+          </div>
+        </div>
+      </div>
     );
   }
 
   if (userData === null) {
     return (
-      <Container className="projects-page">
+      <div className="projects-page">
         <h1>Uh Oh ... You dont have any projects yet!</h1>
-        <Button onClick={() => setHideCreateProject(!hideCreateProject)}
+        <button onClick={() => setHideCreateProject(!hideCreateProject)}
         >
           Create Project
-        </Button>
+        </button>
         {
           hideCreateProject ? null :
             <CreateProjectModal
@@ -117,14 +112,14 @@ const LandingPage = () => {
               handleCreateProject={handleCreateProject}
             />
         }
-      </Container>
+      </div>
     )
   }
 
   return (
-    <Container className="projects-page">
+    <div className="projects-page">
       <h1>Loading...</h1>
-    </Container>
+    </div>
   )
 };
 
