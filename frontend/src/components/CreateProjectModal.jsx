@@ -1,16 +1,7 @@
 import { useState } from "react"
 import PropTypes from 'prop-types';
-import {
-  Modal,
-  Form,
-  Button,
-  Row,
-  Col,
-  Container,
-  Dropdown,
-} from 'react-bootstrap';
 
-export default function CreateProjectModal({ handleShow, handleHide, handleCreateProject }) {
+export default function CreateProjectModal({ handleHide, handleCreateProject }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [criteria, setCriteria] = useState([]);
@@ -55,77 +46,69 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
   };
 
   return (
-    <Modal show={handleShow} onHide={handleHide}>
-      <Modal.Header closeButton>
-        <Modal.Title>
+    <div>
+      <h2>
+        <p>
           <h1>Create a New Project</h1>
-        </Modal.Title>
-      </Modal.Header>
-
-      <Modal.Body>
-        <Form>
-          <Modal.Title>
+        </p>
+      </h2>
+      <div>
+        <form>
+          <p>
             <h3>Project</h3>
-          </Modal.Title>
-          <Form.Group>
-            <Form.Label>Title</Form.Label>
-            <Form.Control
+          </p>
+          <div>
+            <label>Title</label>
+            <input
               type="text"
               value={title}
               onChange={(e) => {
                 setTitle(e.target.value)
               }}
             />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Description</Form.Label>
-            <Form.Control
+          </div>
+          <div>
+            <label>Description</label>
+            <input
               type="text"
               value={description}
               onChange={(e) => {
                 setDescription(e.target.value)
               }}
             />
-          </Form.Group>
-          <Modal.Title>
+          </div>
+          <p>
             <h3>Project Criteria</h3>
-          </Modal.Title>
-          <Container>
-            <Row>
-              <Col>
-                <Form.Group>
-                  <Form.Label>Category</Form.Label>
-                  <Dropdown>
-                    <Dropdown.Toggle variant="primary" id="dropdown-basic">
-                      {criteriaCategory || "Select Category"}
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu>
-                      {categories.map((category, i) => (
-                        <Dropdown.Item key={i} onClick={() => setCriteriaCategory(category)}>{category}</Dropdown.Item>
-                      ))}
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </Form.Group>
-              </Col>
-              <Col>
-                <Form.Group>
-                  <Form.Label>Value</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="value"
-                    value={categoryValue}
-                    onChange={(e) => setCategoryValue(e.target.value)}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Button
-              variant="secondary"
+          </p>
+          <div>
+            <div>
+              <label>Category</label>
+              <div>
+                <div id="dropdown-basic">
+                  {criteriaCategory || "Select Category"}
+                </div>
+                <div>
+                  {categories.map((category, i) => (
+                    <div key={i} onClick={() => setCriteriaCategory(category)}>{category}</div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div>
+              <label>Value</label>
+              <input
+                type="text"
+                name="value"
+                value={categoryValue}
+                onChange={(e) => setCategoryValue(e.target.value)}
+              />
+            </div>
+            <button
               onClick={addCriteria}
             >
               Add Category
-            </Button>
-          </Container>
+            </button>
+          </div>
           {criteria.map((c, i) => (
             <div key={i}>
               <h4>{Object.keys(c.details)[0]}</h4>
@@ -134,21 +117,21 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
                   <li key={j}>{value}</li>
                 ))}
               </ul>
-              <Form.Control
+              <input
                 type="text"
                 placeholder="Add new value"
                 value={criteriaValue}
                 onChange={(e) => setCriteriaValue(e.target.value)}
               />
-              <Button variant="secondary" onClick={() => addValueToCategory(i)}>
+              <button onClick={() => addValueToCategory(i)}>
                 Add Criteria
-              </Button>
-              <Button variant="danger" onClick={() => removeCriteria(i)}>
+              </button>
+              <button onClick={() => removeCriteria(i)}>
                 Remove Criteria
-              </Button>
+              </button>
             </div>
           ))}
-          <Button
+          <button
             disabled={!isFormFilled}
             type="submit"
             onClick={(e) => {
@@ -158,10 +141,10 @@ export default function CreateProjectModal({ handleShow, handleHide, handleCreat
             }}
           >
             Create!
-          </Button>
-        </Form>
-      </Modal.Body>
-    </Modal>
+          </button>
+        </form>
+      </div>
+    </div>
   );
 }
 
