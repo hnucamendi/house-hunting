@@ -1,7 +1,25 @@
 import { useState } from "react"
 import PropTypes from 'prop-types';
+import React from "react";
+import {
+  Modal,
+  Box,
+  Button,
+  Typography,
+  FormControl,
+  InputLabel,
+  Input,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  Divider,
+  Stack,
+} from '@mui/material';
+import { Close as CloseIcon } from '@mui/icons-material';
+import style from "../utils/modalStyle";
 
-export default function CreateProjectModal({ handleHide, handleAddHouse, criteria }) {
+export default function CreateProjectModal({ open, handleHide, handleAddHouse, criteria }) {
   const [address, setAddress] = useState('');
   const [scores, setScores] = useState([]);
   const [notes, setNotes] = useState([]);
@@ -17,32 +35,27 @@ export default function CreateProjectModal({ handleHide, handleAddHouse, criteri
   };
 
   return (
-    <div>
-      < h2 >
-        <h2>
-          <h1>Add House</h1>
-        </h2>
-      </h2 >
-      <div>
-        <form onSubmit={(e) => {
-          e.preventDefault();
-          handleAddHouse();
-        }}>
-          <h2>
-            <h3>House Information</h3>
-          </h2>
-          <div>
-            <label>Address</label>
-            <input
+    <Modal open={open} onHide={handleHide}>
+      <Box sx={style}>
+        <Box display={"flex"} justifyContent={"space-between"}>
+          <Typography variant="h4">House Information</Typography>
+          <IconButton onClick={handleHide}><CloseIcon /></IconButton>
+        </Box>
+        <Box>
+          <FormControl fullWidth>
+            <InputLabel htmlFor="address">Address</InputLabel>
+            <Input
+              id="address"
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
               required
             />
-          </div>
-          <div>
-            <label>Notes</label>
-            <input
+          </FormControl>
+          <FormControl>
+            <InputLabel htmlFor="notes">Notes</InputLabel>
+            <Input
+              id="notes"
               type="text"
               value={note}
               onChange={(e) => {
@@ -53,54 +66,66 @@ export default function CreateProjectModal({ handleHide, handleAddHouse, criteri
             {notes.map((note, index) => (
               <div key={index}>
                 {note}
-                <button onClick={() => notes.splice(index, 1)}>Delete Note</button>
+                <Button onClick={() => notes.splice(index, 1)}>Delete Note</Button>
               </div>
             ))}
-            <button onClick={(e) => {
+            <Button onClick={(e) => {
               e.preventDefault()
               handleAddNote(note)
             }}>
               Add Note
-            </button>
-          </div>
-          <div>
-            <label>Scores</label>
-            {criteria.map((criterion, index) => (
-              <div key={index}>
+            </Button>
+          </FormControl>
+          {criteria.map((criterion, index) => (
+            <React.Fragment key={index}>
+              <Divider orientation="horizontal" flexItem />
+              <Stack
+                alignItems="center"
+                justifyContent={"space-between"}
+                direction="row"
+                divider={<Divider orientation="vertical" flexItem />}
+                spacing={2}
+              >
                 {criterion.category}
-                {Object.keys(criterion.details).map((detail, index) => (
-                  <div key={index}>
-                    <ul>
-                      <li>{detail}</li>
-                      <ul>
-                        <li>{criterion.details[detail]} </li>
-                      </ul>
-                    </ul>
-                  </div>
-                ))
-                }
-                <input
-                  key={index}
-                  type="number"
-                  value={scores[index]?.score || ""}
-                  onChange={(e) => {
-                    if (e.target.value >= 5) {
-                      e.target.value = 5;
-                    }
+                <List sx={{ width: "75%" }}>
+                  {Object.keys(criterion.details).map((detail, index) => (
+                    <React.Fragment key={index} >
+                      <ListItem>
+                        <ListItemText>{detail}</ListItemText>
+                      </ListItem>
+                      <ListItem>
+                        <ListItemText>{criterion.details[detail]} </ListItemText>
+                      </ListItem>
+                    </React.Fragment>
+                  ))}
+                </List>
+                <FormControl>
+                  <InputLabel htmlFor="scores" sx={{ color: "rgba(0, 0, 0, .45)" }}>score (1-5)</InputLabel>
+                  <Input
+                    id="scores"
+                    key={index}
+                    type="number"
+                    value={scores[index]?.score || ""}
+                    onChange={(e) => {
+                      if (e.target.value >= 5) {
+                        e.target.value = 5;
+                      }
 
-                    if (e.target.value <= 0) {
-                      e.target.value = 0;
-                    }
-                    const newScores = [...scores];
-                    newScores[index] = { score: Number(e.target.value), criteriaId: criterion.id };
-                    setScores(newScores);
-                  }}
-                  required
-                />
-              </div>
-            ))}
-          </div>
-          <button
+                      if (e.target.value <= 0) {
+                        e.target.value = 0;
+                      }
+                      const newScores = [...scores];
+                      newScores[index] = { score: Number(e.target.value), criteriaId: criterion.id };
+                      setScores(newScores);
+                    }}
+                    required
+                  />
+                </FormControl>
+              </Stack>
+              <Divider orientation="horizontal" flexItem />
+            </React.Fragment>
+          ))}
+          <Button
             disabled={address === ""}
             onClick={(e) => {
               e.preventDefault();
@@ -110,15 +135,17 @@ export default function CreateProjectModal({ handleHide, handleAddHouse, criteri
             type="submit"
           >
             Add House
-          </button>
-        </form >
-      </div >
-    </div >
+          </Button>
+        </Box>
+      </Box>
+    </Modal >
   );
+
+
 }
 
 CreateProjectModal.propTypes = {
-  handleShow: PropTypes.func.isRequired,
+  open: PropTypes.bool.isRequired,
   handleHide: PropTypes.func.isRequired,
   handleAddHouse: PropTypes.func.isRequired,
   criteria: PropTypes.arrayOf(PropTypes.object).isRequired,
