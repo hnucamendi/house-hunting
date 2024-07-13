@@ -105,7 +105,6 @@ const ProjectsPage = () => {
             Create New Project
           </Button>
         </Box>
-
         {projects && projects.length > 0 ? (
           <Grid container spacing={3}>
             {projects.map((project) => (
