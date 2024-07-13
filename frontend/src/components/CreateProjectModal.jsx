@@ -17,20 +17,7 @@ import {
   Divider,
 } from '@mui/material';
 import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
-
-const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: '90%',
-  maxWidth: 600,
-  maxHeight: '90vh',
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  p: 4,
-  overflowY: 'auto',
-};
+import style from "../utils/modalStyle";
 
 export default function CreateProjectModal({ open, handleHide, handleCreateProject }) {
   const [title, setTitle] = useState("");

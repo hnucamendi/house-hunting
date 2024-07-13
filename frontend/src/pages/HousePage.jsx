@@ -2,6 +2,20 @@ import { useLocation } from "react-router-dom"
 import { useSessionCheck } from "../utils/authService"
 import AddHouseModal from "../components/AddHouseModal"
 import { useEffect, useState, useMemo } from "react"
+import React from "react"
+import {
+  Box,
+  Button,
+  Typography,
+  Stack,
+  Grid,
+  List,
+  ListItem,
+  Card,
+  CardContent,
+  CardHeader,
+  Container,
+} from '@mui/material';
 
 export default function HousePage() {
   useSessionCheck();
@@ -45,7 +59,6 @@ export default function HousePage() {
       })
   }, [url, projectId, houseEntryCount])
 
-  const handleShow = () => setHideAddHouse(false);
   const handleHide = () => setHideAddHouse(true);
 
   const handleAddHouse = (address, scores, notes) => {
@@ -88,77 +101,90 @@ export default function HousePage() {
 
   if (userProject !== null) {
     return (
-      <div>
-        <div>
-          <div key={userProject?.projectId}>
-            <p>{userProject?.project?.title}</p>
-            <p>{userProject?.project?.description}</p>
-            <button onClick={() => setHideAddHouse(!hideAddHouse)}>
-              Add House
-            </button>
-            {
-              hideAddHouse ? null :
-                <AddHouseModal
-                  handleShow={handleShow}
-                  handleHide={handleHide}
-                  handleAddHouse={handleAddHouse}
-                  criteria={userProject?.project?.criteria}
-                />
-            }
-          </div>
+      <Container>
+        <div key={userProject?.projectId}>
+          <Typography variant="h2">{userProject?.project?.title}</Typography>
+          <Typography variant="h3">{userProject?.project?.description}</Typography>
+          <Button onClick={() => setHideAddHouse(!hideAddHouse)}>
+            Add House
+          </Button>
           {
-            userProject?.project?.houseEntries != null
-              ? <div>
-                {userProject?.project?.houseEntries.map((houseEntry, index) => (
-                  <div key={index}>
-                    <div>
-                      <p>{houseEntry.address}</p>
-                      {
-                        houseEntry.scores.map((score, index) => (
-                          <div key={index}>
-                            {mapCriteria[score.criteriaId]}
-                            {score.score}
-                          </div>
-                        ))
-                      }
-                      <p>Average Score:</p>
-                      {Number(houseEntry.scores.averageScore.toFixed(2))}
-                      <p>Notes:</p>
-                      {
-                        houseEntry?.notes.map((note, index) => (
-                          <div key={index}>
-                            {note}
-                          </div>
-                        ))
-                      }
-                    </div>
-                  </div>
-                ))}
-              </div>
-              : <div>
-                <p>No house entries found</p>
-                <button onClick={() => setHideAddHouse(!hideAddHouse)}>
-                  Add House
-                </button>
-                {
-                  hideAddHouse ? null :
-                    <AddHouseModal
-                      handleShow={handleShow}
-                      handleHide={handleHide}
-                      handleAddHouse={handleAddHouse}
-                      criteria={userProject?.project?.criteria}
-                    />
-                }
-              </div>
+            hideAddHouse ? null :
+              <AddHouseModal
+                open={!hideAddHouse}
+                handleHide={handleHide}
+                handleAddHouse={handleAddHouse}
+                criteria={userProject?.project?.criteria}
+              />
           }
         </div>
-      </div>
+        {
+          userProject?.project?.houseEntries != null
+            ? <div>
+              {userProject?.project?.houseEntries.map((houseEntry, index) => (
+                <React.Fragment key={index}>
+                  <Card variant="outlined">
+                    <CardHeader
+                      title={houseEntry.address}
+                      subheader={"Average Score: " + houseEntry.scores.averageScore}
+                    />
+                    <CardContent>
+                      {
+                        houseEntry.scores.map((score, index) => (
+                          <React.Fragment key={index}>
+                            <Stack
+                              direction="row"
+                              spacing={2}
+                            >
+                              <Box>
+                                {mapCriteria[score.criteriaId] + ":"}
+                              </Box>
+                              <Box>
+                                {score.score}
+                              </Box>
+                            </Stack>
+                          </React.Fragment>
+                        ))
+                      }
+                      <List>
+                        <Typography>Notes:</Typography>
+                        {
+                          houseEntry?.notes.map((note, index) => (
+                            <React.Fragment key={index}>
+                              <ListItem>
+                                {note}
+                              </ListItem>
+                            </React.Fragment>
+                          ))}
+                      </List>
+                    </CardContent>
+                  </Card>
+                </React.Fragment>
+              ))}
+            </div>
+            : <div>
+              <Typography>No house entries found</Typography>
+              <Button onClick={() => setHideAddHouse(!hideAddHouse)}>
+                Add House
+              </Button>
+              {
+                hideAddHouse ? null :
+                  <AddHouseModal
+                    open={!hideAddHouse}
+                    handleHide={handleHide}
+                    handleAddHouse={handleAddHouse}
+                    criteria={userProject?.project?.criteria}
+                  />
+              }
+            </div>
+        }
+      </Container>
     );
   }
 
   return (
-    <div className="projects-page">
-      <h1>Loading...</h1>
-    </div>
+    <Box>
+      <Typography variant="h2">Loading...</Typography>
+    </Box>
   )
 }
