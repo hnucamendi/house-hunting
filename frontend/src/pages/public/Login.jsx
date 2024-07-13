@@ -26,6 +26,7 @@ const Login = () => {
     length: false,
     lowercase: false,
     uppercase: false,
+    match: false,
   });
   const navigate = useNavigate();
 
@@ -35,9 +36,10 @@ const Login = () => {
         length: password.length >= 8,
         lowercase: /[a-z]/.test(password),
         uppercase: /[A-Z]/.test(password),
+        match: password === confirmPassword && password !== "",
       });
     }
-  }, [password, isSignUp]);
+  }, [password, confirmPassword, isSignUp]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,10 +65,6 @@ const Login = () => {
   };
 
   const handleSignUp = async () => {
-    if (password !== confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
     if (!Object.values(passwordRequirements).every(Boolean)) {
       alert("Please meet all password requirements");
       return;
@@ -87,6 +85,11 @@ const Login = () => {
       <ListItemText primary={text} />
     </ListItem>
   );
+
+  PasswordRequirement.propTypes = {
+    met: PropTypes.bool.isRequired,
+    text: PropTypes.string.isRequired,
+  };
 
   return (
     <Container component="main" maxWidth="xs">
@@ -148,6 +151,10 @@ const Login = () => {
                   met={passwordRequirements.uppercase}
                   text="Contains an uppercase letter"
                 />
+                <PasswordRequirement
+                  met={passwordRequirements.match}
+                  text="Passwords match"
+                />
               </List>
             </>
           )}
@@ -179,10 +186,5 @@ const Login = () => {
     </Container>
   );
 };
-
-Login.propTypes - {
-  met: PropTypes.bool.isRequired,
-  text: PropTypes.string.isRequired,
-}
 
 export default Login;
