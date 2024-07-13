@@ -1,6 +1,5 @@
 import { useState } from "react"
 import PropTypes from 'prop-types';
-import React from "react";
 import {
   Modal,
   Box,
@@ -14,7 +13,7 @@ import {
   ListItemText,
   IconButton,
   Divider,
-  Stack,
+  Grid,
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import style from "../utils/modalStyle";
@@ -48,103 +47,112 @@ export default function CreateProjectModal({ open, handleHide, handleAddHouse, c
   };
 
   return (
-    <Modal open={open} onHide={handleHide}>
+    <Modal open={open} onClose={handleHide}>
       <Box sx={style}>
         <Box display={"flex"} justifyContent={"space-between"}>
           <Typography variant="h4">House Information</Typography>
           <IconButton onClick={handleHide}><CloseIcon /></IconButton>
         </Box>
-        <Box>
-          <FormControl fullWidth>
-            <InputLabel htmlFor="address">Address</InputLabel>
-            <Input
-              id="address"
-              type="text"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              required
-            />
-          </FormControl>
-          <br />
-          <br />
-          <FormControl>
-            <InputLabel htmlFor="notes">Notes</InputLabel>
-            <Input
-              id="notes"
-              type="text"
-              value={note}
-              onChange={(e) => {
-                setNote(e.target.value)
-              }}
-              required
-            />
-            {notes.map((note, index) => (
-              <div key={index}>
-                {note}
-                <Button onClick={() => notes.splice(index, 1)}>Delete Note</Button>
-              </div>
-            ))}
-            <Button onClick={(e) => {
-              e.preventDefault()
-              handleAddNote(note)
-            }}>
-              Add Note
-            </Button>
-          </FormControl>
-          {criteria.map((criterion, index) => (
-            <React.Fragment key={index}>
-              <Divider orientation="horizontal" flexItem />
-              <Stack
-                alignItems="center"
-                justifyContent={"space-between"}
-                direction="row"
-                divider={<Divider orientation="vertical" flexItem />}
-                spacing={2}
+        <Box component="form" noValidate autoComplete="off">
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="address">Address</InputLabel>
+                <Input
+                  id="address"
+                  type="text"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  required
+                />
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <FormControl fullWidth>
+                <InputLabel htmlFor="notes">Notes</InputLabel>
+                <Input
+                  id="notes"
+                  type="text"
+                  value={note}
+                  onChange={(e) => setNote(e.target.value)}
+                  required
+                />
+              </FormControl>
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleAddNote(note);
+                }}
+                sx={{ mt: 1 }}
               >
-                {criterion.category}
-                <List sx={{ width: "75%" }}>
-                  {Object.keys(criterion.details).map((detail, index) => (
-                    <React.Fragment key={index}>
-                      <ListItem>
-                        <ListItemText>{detail}</ListItemText>
-                      </ListItem>
-                      {
-                        criterion.details[detail].map((d, i) => (
-                          <ListItem key={i}>
-                            <ListItemText>{d}</ListItemText>
-                          </ListItem>
-                        ))
-                      }
-                    </React.Fragment>
-                  ))}
-                </List>
-                <FormControl>
-                  <InputLabel htmlFor="scores" sx={{ color: "rgba(0, 0, 0, .45)" }}>score (1-5)</InputLabel>
-                  <Input
-                    id="scores"
-                    key={index}
-                    type="number"
-                    value={scores[index]?.score || ""}
-                    onChange={(e) => {
-                      if (e.target.value >= 5) {
-                        e.target.value = 5;
-                      }
+                Add Note
+              </Button>
+              <List>
+                {notes.map((note, index) => (
+                  <ListItem key={index} secondaryAction={
+                    <Button onClick={() => {
+                      const newNotes = [...notes];
+                      newNotes.splice(index, 1);
+                      // Assuming you have a setNotes function
+                      setNotes(newNotes);
+                    }}>
+                      Delete
+                    </Button>
+                  }>
+                    <ListItemText primary={note} />
+                  </ListItem>
+                ))}
+              </List>
+            </Grid>
+          </Grid>
 
-                      if (e.target.value <= 0) {
-                        e.target.value = 0;
-                      }
-                      const newScores = [...scores];
-                      newScores[index] = { score: Number(e.target.value), criteriaId: criterion.id };
-                      setScores(newScores);
-                    }}
-                    required
-                  />
-                </FormControl>
-              </Stack>
-              <Divider orientation="horizontal" flexItem />
-            </React.Fragment>
+          <Divider sx={{ my: 3 }} />
+
+          {criteria.map((criterion, index) => (
+            <Box key={index} sx={{ mb: 3 }}>
+              <Typography variant="h6">{criterion.category}</Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={8}>
+                  <List>
+                    {Object.entries(criterion.details).map(([detail, values], detailIndex) => (
+                      <ListItem key={detailIndex}>
+                        <ListItemText
+                          primary={detail}
+                          secondary={values.join(', ')}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <FormControl fullWidth>
+                    <InputLabel htmlFor={`scores-${index}`} sx={{ color: "rgba(0, 0, 0, .45)" }}>
+                      Score (1-5)
+                    </InputLabel>
+                    <Input
+                      id={`scores-${index}`}
+                      type="number"
+                      value={scores[index]?.score || ""}
+                      onChange={(e) => {
+                        const value = Math.min(Math.max(Number(e.target.value), 0), 5);
+                        const newScores = [...scores];
+                        newScores[index] = { score: value, criteriaId: criterion.id };
+                        setScores(newScores);
+                      }}
+                      inputProps={{ min: 0, max: 5, step: 0.1 }}
+                      required
+                    />
+                  </FormControl>
+                </Grid>
+              </Grid>
+              <Divider sx={{ mt: 2 }} />
+            </Box>
           ))}
+
           <Button
+            fullWidth
+            variant="contained"
+            color="primary"
             disabled={address === ""}
             onClick={async (e) => {
               e.preventDefault();
@@ -153,6 +161,7 @@ export default function CreateProjectModal({ open, handleHide, handleAddHouse, c
               handleHide();
             }}
             type="submit"
+            sx={{ mt: 3 }}
           >
             Add House
           </Button>
