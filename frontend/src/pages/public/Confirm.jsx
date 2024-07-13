@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { confirmSignUp } from "../../utils/authService";
+import {
+  Box,
+  Stack,
+  Button,
+  Typography,
+  FormGroup,
+  FormControl,
+  InputLabel,
+  Input
+} from "@mui/material";
 
 export default function Confirm() {
   const navigate = useNavigate();
@@ -21,33 +31,40 @@ export default function Confirm() {
     }
   };
   return (
-    <div className="parent">
-      <div className="container" style={{ width: "30%" }}>
-        <h2 className="m-2">Confirm Account</h2>
+    <Box sx={{ width: "100%" }}>
+      <Stack spacing={2} alignItems={"center"} justifyContent={"center"}>
+        <Typography variant="h2" align="center">Confirm Account</Typography>
         <form onSubmit={handleSubmit}>
-          <div className="m-2">
-            <input
-              className="form-control"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              required
-            />
-          </div>
-          <div className="m-2">
-            <input
-              className="form-control"
-              type="text"
-              value={confirmationCode}
-              onChange={(e) => setConfirmationCode(e.target.value)}
-              placeholder="Confirmation Code"
-              required
-            />
-          </div>
-          <button className="btn btn-primary m-2" type="submit">Confirm Account</button>
+          <FormGroup>
+            <FormControl>
+              <InputLabel htmlFor="confirm-email">Email</InputLabel>
+              <Input
+                id="confirm-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                required
+              />
+            </FormControl>
+          </FormGroup>
+          <FormGroup>
+            <FormControl>
+              <InputLabel htmlFor="confirm-code">Confirmation Code</InputLabel>
+              <Input
+                id="confirm-code"
+                type="text"
+                value={confirmationCode}
+                onChange={(e) => setConfirmationCode(e.target.value)
+                }
+                placeholder="Confirmation Code"
+                required
+              />
+            </FormControl>
+          </FormGroup>
+          <Button type="submit">Confirm Account</Button>
         </form>
-      </div>
-    </div>
+      </Stack>
+    </Box>
   );
 }
