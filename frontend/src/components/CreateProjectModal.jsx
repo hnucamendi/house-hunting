@@ -12,24 +12,41 @@ import {
   InputLabel,
   List,
   ListItem,
-  ListItemText,
   IconButton,
   Divider,
 } from '@mui/material';
-import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { Add as AddIcon, Delete as DeleteIcon, Close as CloseIcon } from '@mui/icons-material';
 import style from "../utils/modalStyle";
 
+const DEFAULTSTATE = {
+  title: "",
+  description: "",
+  criteria: [],
+  criteriaCategory: "",
+  categoryValue: "",
+  newValues: {},
+}
+
 export default function CreateProjectModal({ open, handleHide, handleCreateProject }) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [criteria, setCriteria] = useState([]);
-  const [criteriaCategory, setCriteriaCategory] = useState("");
-  const [categoryValue, setCategoryValue] = useState("");
-  const [newValues, setNewValues] = useState({});
+  const [title, setTitle] = useState(DEFAULTSTATE.title);
+  const [description, setDescription] = useState(DEFAULTSTATE.description);
+  const [criteria, setCriteria] = useState(DEFAULTSTATE.criteria);
+  const [criteriaCategory, setCriteriaCategory] = useState(DEFAULTSTATE.criteriaCategory);
+  const [categoryValue, setCategoryValue] = useState(DEFAULTSTATE.categoryValue);
+  const [newValues, setNewValues] = useState(DEFAULTSTATE.newValues);
 
   const categories = ["Bedroom", "Bathroom", "Kitchen", "Living Room", "Dining Room", "Garage", "Yard", "Outdoors", "Basement", "Attic", "Laundry Room", "Office", "Gym", "Storage", "Other"];
 
   const isFormFilled = title && description && criteria.length > 0;
+
+  const resetState = () => {
+    setTitle(DEFAULTSTATE.title);
+    setDescription(DEFAULTSTATE.description);
+    setCriteria(DEFAULTSTATE.criteria);
+    setCriteriaCategory(DEFAULTSTATE.criteriaCategory);
+    setCategoryValue(DEFAULTSTATE.categoryValue);
+    setNewValues(DEFAULTSTATE.newValues);
+  }
 
   const addCriteria = () => {
     if (criteriaCategory && categoryValue) {
@@ -65,16 +82,17 @@ export default function CreateProjectModal({ open, handleHide, handleCreateProje
         }
         return c;
       }));
-      setNewValues({ ...newValues, [id]: '' });
+      setNewValues({ ...newValues, [id]: "" });
     }
   };
 
   return (
     <Modal open={open} onClose={handleHide}>
       <Box sx={style}>
-        <Typography variant="h4" component="h2" gutterBottom>
-          Create Project
-        </Typography>
+        <Box display={"flex"} justifyContent={"space-between"}>
+          <Typography variant="h4" component="h2" gutterBottom>Create Project</Typography>
+          <IconButton onClick={handleHide}><CloseIcon /></IconButton>
+        </Box>
         <TextField
           fullWidth
           label="Title"
@@ -109,7 +127,8 @@ export default function CreateProjectModal({ open, handleHide, handleCreateProje
           </FormControl>
           <TextField
             fullWidth
-            label="Value"
+            label="Criteria"
+            placeholder={`${criteriaCategory} Criteria`}
             value={categoryValue}
             onChange={(e) => setCategoryValue(e.target.value)}
           />
@@ -126,34 +145,32 @@ export default function CreateProjectModal({ open, handleHide, handleCreateProje
             const category = Object.keys(c.details)[0];
             return (
               <React.Fragment key={c.id}>
-                <ListItem>
-                  <ListItemText
-                    primary={category}
-                    secondary={
-                      <React.Fragment>
-                        {c.details[category].join(", ")}
-                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
-                          <TextField
-                            size="small"
-                            placeholder="Add new value"
-                            value={newValues[c.id] || ''}
-                            onChange={(e) => setNewValues({ ...newValues, [c.id]: e.target.value })}
-                            sx={{ flexGrow: 1, mr: 1 }}
-                          />
-                          <IconButton
-                            size="small"
-                            onClick={() => addValueToCategory(c.id)}
-                            disabled={!newValues[c.id]}
-                          >
-                            <AddIcon />
-                          </IconButton>
-                          <IconButton edge="end" aria-label="delete" onClick={() => removeCriteria(c.id)}>
-                            <DeleteIcon />
-                          </IconButton>
-                        </Box>
-                      </React.Fragment>
-                    }
-                  />
+                <ListItem alignItems="flex-start">
+                  <Box sx={{ width: '100%' }}>
+                    <Typography variant="subtitle1">{category}</Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {c.details[category].join(", ")}
+                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                      <TextField
+                        size="small"
+                        placeholder={`Add more ${category} criteria`}
+                        value={newValues[c.id] || ''}
+                        onChange={(e) => setNewValues({ ...newValues, [c.id]: e.target.value })}
+                        sx={{ flexGrow: 1, mr: 1 }}
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={() => addValueToCategory(c.id)}
+                        disabled={!newValues[c.id]}
+                      >
+                        <AddIcon />
+                      </IconButton>
+                      <IconButton edge="end" aria-label="delete" onClick={() => removeCriteria(c.id)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    </Box>
+                  </Box>
                 </ListItem>
                 <Divider />
               </React.Fragment>
@@ -165,8 +182,9 @@ export default function CreateProjectModal({ open, handleHide, handleCreateProje
           variant="contained"
           color="primary"
           disabled={!isFormFilled}
-          onClick={() => {
-            handleCreateProject(title, description, criteria);
+          onClick={async () => {
+            await handleCreateProject(title, description, criteria);
+            resetState();
             handleHide();
           }}
           sx={{ mt: 3 }}

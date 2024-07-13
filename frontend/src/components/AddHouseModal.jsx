@@ -19,12 +19,25 @@ import {
 import { Close as CloseIcon } from '@mui/icons-material';
 import style from "../utils/modalStyle";
 
-export default function CreateProjectModal({ open, handleHide, handleAddHouse, criteria }) {
-  const [address, setAddress] = useState('');
-  const [scores, setScores] = useState([]);
-  const [notes, setNotes] = useState([]);
+const DEFAULTSTATE = {
+  address: "",
+  scores: [],
+  notes: [],
+  note: "",
+}
 
-  const [note, setNote] = useState('');
+export default function CreateProjectModal({ open, handleHide, handleAddHouse, criteria }) {
+  const [address, setAddress] = useState(DEFAULTSTATE.address);
+  const [scores, setScores] = useState(DEFAULTSTATE.scores);
+  const [notes, setNotes] = useState(DEFAULTSTATE.notes);
+  const [note, setNote] = useState(DEFAULTSTATE.note);
+
+  const resetState = () => {
+    setAddress(DEFAULTSTATE.address);
+    setScores(DEFAULTSTATE.scores);
+    setNotes(DEFAULTSTATE.notes);
+    setNote(DEFAULTSTATE.note);
+  }
 
   const handleAddNote = (value) => {
     const newNotes = [...notes];
@@ -52,6 +65,8 @@ export default function CreateProjectModal({ open, handleHide, handleAddHouse, c
               required
             />
           </FormControl>
+          <br />
+          <br />
           <FormControl>
             <InputLabel htmlFor="notes">Notes</InputLabel>
             <Input
@@ -89,13 +104,17 @@ export default function CreateProjectModal({ open, handleHide, handleAddHouse, c
                 {criterion.category}
                 <List sx={{ width: "75%" }}>
                   {Object.keys(criterion.details).map((detail, index) => (
-                    <React.Fragment key={index} >
+                    <React.Fragment key={index}>
                       <ListItem>
                         <ListItemText>{detail}</ListItemText>
                       </ListItem>
-                      <ListItem>
-                        <ListItemText>{criterion.details[detail]} </ListItemText>
-                      </ListItem>
+                      {
+                        criterion.details[detail].map((d, i) => (
+                          <ListItem key={i}>
+                            <ListItemText>{d}</ListItemText>
+                          </ListItem>
+                        ))
+                      }
                     </React.Fragment>
                   ))}
                 </List>
@@ -127,9 +146,10 @@ export default function CreateProjectModal({ open, handleHide, handleAddHouse, c
           ))}
           <Button
             disabled={address === ""}
-            onClick={(e) => {
+            onClick={async (e) => {
               e.preventDefault();
-              handleAddHouse(address, scores, notes);
+              await handleAddHouse(address, scores, notes);
+              resetState();
               handleHide();
             }}
             type="submit"
@@ -138,7 +158,7 @@ export default function CreateProjectModal({ open, handleHide, handleAddHouse, c
           </Button>
         </Box>
       </Box>
-    </Modal >
+    </Modal>
   );
 
 
