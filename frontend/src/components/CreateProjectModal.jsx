@@ -1,29 +1,35 @@
-import { useState } from "react"
+import React, { useState } from "react";
 import PropTypes from 'prop-types';
 import {
   Modal,
   Box,
   Button,
   Typography,
-  Stack,
-  Grid,
-  Input,
+  TextField,
   Select,
   MenuItem,
-  InputLabel,
   FormControl,
+  InputLabel,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  Divider,
 } from '@mui/material';
+import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
 
 const style = {
   position: 'absolute',
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: "50%",
+  width: '90%',
+  maxWidth: 600,
+  maxHeight: '90vh',
   bgcolor: 'background.paper',
-  border: '2px solid #000',
   boxShadow: 24,
   p: 4,
+  overflowY: 'auto',
 };
 
 export default function CreateProjectModal({ open, handleHide, handleCreateProject }) {
@@ -31,10 +37,10 @@ export default function CreateProjectModal({ open, handleHide, handleCreateProje
   const [description, setDescription] = useState("");
   const [criteria, setCriteria] = useState([]);
   const [criteriaCategory, setCriteriaCategory] = useState("");
-  const [categoryValue, setCategoryValue] = useState([]);
-  const [criteriaValue, setCriteriaValue] = useState([]);
+  const [categoryValue, setCategoryValue] = useState("");
+  const [newValues, setNewValues] = useState({});
 
-  const categories = ["Bedroom", "Bathroom", "Kitchen", "Living Room", "Dining Room", "Garage", "Yard", "Outdoors", "Basement", "Attic", "Laundry Room", "Office", "Gym", "Storage", "Other"]
+  const categories = ["Bedroom", "Bathroom", "Kitchen", "Living Room", "Dining Room", "Garage", "Yard", "Outdoors", "Basement", "Attic", "Laundry Room", "Office", "Gym", "Storage", "Other"];
 
   const isFormFilled = title && description && criteria.length > 0;
 
@@ -43,7 +49,7 @@ export default function CreateProjectModal({ open, handleHide, handleCreateProje
       setCriteria([
         ...criteria,
         {
-          id: "",
+          id: Date.now().toString(),
           details: {
             [criteriaCategory]: [categoryValue]
           }
@@ -54,224 +60,136 @@ export default function CreateProjectModal({ open, handleHide, handleCreateProje
     }
   };
 
-  const removeCriteria = (index) => {
-    const newCriteria = [...criteria];
-    newCriteria.splice(index, 1);
-    setCriteria(newCriteria);
+  const removeCriteria = (id) => {
+    setCriteria(criteria.filter(c => c.id !== id));
   };
 
-  const addValueToCategory = (index) => {
-    if (criteriaValue) {
-      const newCriteria = [...criteria];
-      const category = Object.keys(newCriteria[index].details)[0];
-      newCriteria[index].details[category].push(criteriaValue);
-      setCriteria(newCriteria);
-      setCategoryValue("");
+  const addValueToCategory = (id) => {
+    if (newValues[id]) {
+      setCriteria(criteria.map(c => {
+        if (c.id === id) {
+          const category = Object.keys(c.details)[0];
+          return {
+            ...c,
+            details: {
+              [category]: [...c.details[category], newValues[id]]
+            }
+          };
+        }
+        return c;
+      }));
+      setNewValues({ ...newValues, [id]: '' });
     }
   };
 
   return (
     <Modal open={open} onClose={handleHide}>
       <Box sx={style}>
-        <Typography variant="h5" align="center">Create Project</Typography>
-        <Stack spacing={2} alignItems={"center"} justifyContent={"center"}>
-          <Grid container>
-            <Grid item>
-              <Typography variant="h6">Title</Typography>
-              <Input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </Grid>
-            <Grid item>
-              <Typography variant="h6">Description</Typography>
-              <Input
-                type="text"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </Grid>
-          </Grid>
-          <Typography variant="h4">Project Criteria</Typography>
-          <Grid container>
-            <Grid item>
-              <Typography variant="h6">Category</Typography>
-              <FormControl fullWidth>
-                <InputLabel id="select-label">Select Category</InputLabel>
-                <Select
-                  id="select"
-                  value={criteriaCategory}
-                  onChange={(e) => setCriteriaCategory(e.target.value)}
-                  label="Select Category"
-                >
-                  {categories.map((category, i) => (
-                    <MenuItem
-                      key={i}
-                      value={category}
-                      onClick={() => setCriteriaCategory(category)}
-                    >
-                      {category}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item>
-              <Typography variant="h6">Value</Typography>
-              <Input
-                type="text"
-                value={categoryValue}
-                onChange={(e) => setCategoryValue(e.target.value)}
-              />
-            </Grid>
-          </Grid>
+        <Typography variant="h4" component="h2" gutterBottom>
+          Create Project
+        </Typography>
+        <TextField
+          fullWidth
+          label="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          margin="normal"
+        />
+        <TextField
+          fullWidth
+          label="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          margin="normal"
+          multiline
+          rows={2}
+        />
+        <Typography variant="h5" component="h3" gutterBottom sx={{ mt: 3 }}>
+          Project Criteria
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+          <FormControl fullWidth>
+            <InputLabel>Category</InputLabel>
+            <Select
+              value={criteriaCategory}
+              onChange={(e) => setCriteriaCategory(e.target.value)}
+              label="Category"
+            >
+              {categories.map((category) => (
+                <MenuItem key={category} value={category}>{category}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <TextField
+            fullWidth
+            label="Value"
+            value={categoryValue}
+            onChange={(e) => setCategoryValue(e.target.value)}
+          />
           <Button
             variant="contained"
             onClick={addCriteria}
+            startIcon={<AddIcon />}
           >
-            Add Category
+            Add
           </Button>
-          {criteria.map((c, i) => (
-            <div key={i}>
-              <Typography variant="h6">{Object.keys(c.details)[0]}</Typography>
-              <ul>
-                {c.details[Object.keys(c.details)[0]].map((value, j) => (
-                  <li key={j}>{value}</li>
-                ))}
-              </ul>
-              <Input
-                type="text"
-                placeholder="Add new value"
-                value={criteriaValue}
-                onChange={(e) => setCriteriaValue(e.target.value)}
-              />
-              <Button variant="contained" onClick={() => addValueToCategory(i)}>
-                Add Criteria
-              </Button>
-              <Button variant="contained" onClick={() => removeCriteria(i)}>
-                Remove Criteria
-              </Button>
-            </div>
-          ))}
-          <Button
-            disabled={!isFormFilled}
-            onClick={() => {
-              handleCreateProject(title, description, criteria);
-              handleHide();
-            }}
-          >
-            Create!
-          </Button>
-        </Stack>
+        </Box>
+        <List>
+          {criteria.map((c) => {
+            const category = Object.keys(c.details)[0];
+            return (
+              <React.Fragment key={c.id}>
+                <ListItem>
+                  <ListItemText
+                    primary={category}
+                    secondary={
+                      <React.Fragment>
+                        {c.details[category].join(", ")}
+                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                          <TextField
+                            size="small"
+                            placeholder="Add new value"
+                            value={newValues[c.id] || ''}
+                            onChange={(e) => setNewValues({ ...newValues, [c.id]: e.target.value })}
+                            sx={{ flexGrow: 1, mr: 1 }}
+                          />
+                          <IconButton
+                            size="small"
+                            onClick={() => addValueToCategory(c.id)}
+                            disabled={!newValues[c.id]}
+                          >
+                            <AddIcon />
+                          </IconButton>
+                          <IconButton edge="end" aria-label="delete" onClick={() => removeCriteria(c.id)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        </Box>
+                      </React.Fragment>
+                    }
+                  />
+                </ListItem>
+                <Divider />
+              </React.Fragment>
+            );
+          })}
+        </List>
+        <Button
+          fullWidth
+          variant="contained"
+          color="primary"
+          disabled={!isFormFilled}
+          onClick={() => {
+            handleCreateProject(title, description, criteria);
+            handleHide();
+          }}
+          sx={{ mt: 3 }}
+        >
+          Create Project
+        </Button>
       </Box>
     </Modal>
   );
 }
-
-{/* <Modal.Header closeButton>
-      </Modal.Header>
-
-      <Modal.Body>
-        <Form>
-          <Modal.Title>
-            <h3>Project</h3>
-          </Modal.Title>
-          <Form.Group>
-            <Form.Label>Title</Form.Label>
-            <Form.Control
-              type="text"
-              value={title}
-              onChange={(e) => {
-                setTitle(e.target.value)
-              }}
-            />
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Description</Form.Label>
-            <Form.Control
-              type="text"
-              value={description}
-              onChange={(e) => {
-                setDescription(e.target.value)
-              }}
-            />
-          </Form.Group>
-          <Modal.Title>
-            <h3>Project Criteria</h3>
-          </Modal.Title>
-          <Container>
-            <Row>
-              <Col>
-                <Form.Group>
-                  <Form.Label>Category</Form.Label>
-                  <Dropdown>
-                    <Dropdown.Toggle variant="primary" id="dropdown-basic">
-                      {criteriaCategory || "Select Category"}
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu>
-                      {categories.map((category, i) => (
-                        <Dropdown.Item key={i} onClick={() => setCriteriaCategory(category)}>{category}</Dropdown.Item>
-                      ))}
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </Form.Group>
-              </Col>
-              <Col>
-                <Form.Group>
-                  <Form.Label>Value</Form.Label>
-                  <Form.Control
-                    type="text"
-                    name="value"
-                    value={categoryValue}
-                    onChange={(e) => setCategoryValue(e.target.value)}
-                  />
-                </Form.Group>
-              </Col>
-            </Row>
-            <Button
-              variant="secondary"
-              onClick={addCriteria}
-            >
-              Add Category
-            </Button>
-          </Container>
-          {criteria.map((c, i) => (
-            <div key={i}>
-              <h4>{Object.keys(c.details)[0]}</h4>
-              <ul>
-                {c.details[Object.keys(c.details)[0]].map((value, j) => (
-                  <li key={j}>{value}</li>
-                ))}
-              </ul>
-              <Form.Control
-                type="text"
-                placeholder="Add new value"
-                value={criteriaValue}
-                onChange={(e) => setCriteriaValue(e.target.value)}
-              />
-              <Button variant="secondary" onClick={() => addValueToCategory(i)}>
-                Add Criteria
-              </Button>
-              <Button variant="danger" onClick={() => removeCriteria(i)}>
-                Remove Criteria
-              </Button>
-            </div>
-          ))}
-          <Button
-            disabled={!isFormFilled}
-            type="submit"
-            onClick={(e) => {
-              e.preventDefault();
-              handleCreateProject(title, description, criteria);
-              handleHide();
-            }}
-          >
-            Create!
-          </Button>
-        </Form>
-      </Modal.Body>
-       */}
 
 CreateProjectModal.propTypes = {
   open: PropTypes.bool.isRequired,
