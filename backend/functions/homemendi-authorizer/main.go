@@ -170,7 +170,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2C
 		return generateDeny(), nil
 	}
 
-	if claims["aud"] != "rn748ko1vos4ptum8sov0bg5t" {
+	if claims["aud"] != "77uqobagk9mq7k5komp8ba0ss7" {
 		log.Println("Invalid audience")
 		return generateDeny(), nil
 	}
