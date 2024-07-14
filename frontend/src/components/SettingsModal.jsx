@@ -17,7 +17,7 @@ import style from "../utils/modalStyle";
 export default function CreateProjectModal({ open, handleHide, handleConfigureLanguage }) {
   const [language, setLanguage] = useState("en");
 
-  //test
+  //Test
 
   return (
     <Modal open={open} onClose={handleHide}>
