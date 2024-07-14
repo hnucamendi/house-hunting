@@ -110,6 +110,7 @@ const ProjectsPage = () => {
         {
           method: "POST",
           body: JSON.stringify({
+            settings: { language },
             project: { title, description, criteria }
           }),
           headers: {

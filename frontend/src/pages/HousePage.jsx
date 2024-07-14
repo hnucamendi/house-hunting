@@ -37,7 +37,7 @@ const HousePage = () => {
   };
 
   const url = useMemo(() => {
-    const u = new URL(`https://api.hnucamendi.net/project`);
+    const u = new URL(`https://api.homemendi.com/project`);
     u.searchParams.append('projectId', projectId);
     return u;
   }, [projectId]);

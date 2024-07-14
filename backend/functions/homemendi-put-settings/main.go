@@ -6,7 +6,9 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"strings"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -126,6 +128,27 @@ func generateId(pre IDType, identifier string) string {
 	return fmt.Sprintf("%x", md5.Sum(b))
 }
 
+func getProjects() ([]User, error) {
+	resp, err := http.Get("https://api.homemendi.com/projects")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get projects: %v", err)
+	}
+
+	defer resp.Body.Close()
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %v", err)
+	}
+
+	var users []User
+	if err := json.Unmarshal(respBody, &users); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal users: %v", err)
+	}
+
+	return users, nil
+}
+
 func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
 	token := &Token{
 		event.Headers,
@@ -144,29 +167,42 @@ func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (
 		}, nil
 	}
 
-	item := &dynamodb.UpdateItemInput{
-		TableName: aws.String("UsersTable"),
-		Key: map[string]types.AttributeValue{
-			"id": &types.AttributeValueMemberS{
-				Value: id,
-			},
-		},
-		UpdateExpression: aws.String("SET #settings.#lang = :langValue"),
-		ExpressionAttributeNames: map[string]string{
-			"#settings": "settings",
-			"#lang":     "language",
-		},
-		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":langValue": &types.AttributeValueMemberS{Value: u.Settings.Language},
-		},
-	}
-
-	_, err = db.UpdateItem(ctx, item)
+	projs, err := getProjects()
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
-			Body:       fmt.Sprintf("Failed to update item: %v", err),
+			Body:       fmt.Sprintf("Failed to get projects: %v", err),
 		}, nil
+	}
+
+	for _, proj := range projs {
+		item := &dynamodb.UpdateItemInput{
+			TableName: aws.String("UsersTable"),
+			Key: map[string]types.AttributeValue{
+				"id": &types.AttributeValueMemberS{
+					Value: id,
+				},
+				"projectId": &types.AttributeValueMemberS{
+					Value: proj.ProjectId,
+				},
+			},
+			UpdateExpression: aws.String("SET #settings.#lang = :langValue"),
+			ExpressionAttributeNames: map[string]string{
+				"#settings": "settings",
+				"#lang":     "language",
+			},
+			ExpressionAttributeValues: map[string]types.AttributeValue{
+				":langValue": &types.AttributeValueMemberS{Value: u.Settings.Language},
+			},
+		}
+
+		_, err = db.UpdateItem(ctx, item)
+		if err != nil {
+			return &events.APIGatewayV2HTTPResponse{
+				StatusCode: 500,
+				Body:       fmt.Sprintf("Failed to update item: %v", err),
+			}, nil
+		}
 	}
 
 	return &events.APIGatewayV2HTTPResponse{
