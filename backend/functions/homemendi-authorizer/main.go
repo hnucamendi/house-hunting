@@ -99,7 +99,7 @@ func parseToken(tokenString string) (*jwt.Token, error) {
 }
 
 func getPublicKey() (*PublicKeys, error) {
-	url := "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_JfP0nnpWY/.well-known/jwks.json"
+	url := "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_2vHxXkAqV/.well-known/jwks.json"
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Printf("Failed to get public key: %v", err)
@@ -165,7 +165,7 @@ func HandleRequest(event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2C
 		return generateDeny(), nil
 	}
 
-	if claims["iss"] != "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_JfP0nnpWY" {
+	if claims["iss"] != "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_2vHxXkAqV" {
 		log.Println("Invalid issuer")
 		return generateDeny(), nil
 	}
