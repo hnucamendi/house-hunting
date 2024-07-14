@@ -16,21 +16,21 @@ import {
 import { Close as CloseIcon } from '@mui/icons-material';
 import style from "../utils/modalStyle";
 
-export default function CreateProjectModal({ open, handleHide, handleConfigureLanguage }) {
+export default function CreateProjectModal({ open, handleHide, handleConfigureLanguage, lang }) {
   const [language, setLanguage] = useState("");
 
   return (
     <Modal open={open} onClose={handleHide}>
       <Box sx={style}>
         <Box display={"flex"} justifyContent={"space-between"}>
-          <Typography variant="h4">Settings</Typography>
+          <Typography variant="h4">{lang === "en" ? "Settings" : "configuración"}</Typography>
           <IconButton onClick={handleHide}><CloseIcon /></IconButton>
         </Box>
         <Box component="form" noValidate autoComplete="off">
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <FormControl fullWidth>
-                <FormLabel id="language">Language</FormLabel>
+                <FormLabel id="language">{lang === "en" ? "Language" : "idioma"}</FormLabel>
                 <RadioGroup
                   id="language"
                   aria-labelledby="languge"
@@ -55,7 +55,7 @@ export default function CreateProjectModal({ open, handleHide, handleConfigureLa
             type="submit"
             sx={{ mt: 3 }}
           >
-            Save
+            {lang === "en" ? "Save" : "guardar"}
           </Button>
         </Box>
       </Box>
@@ -69,4 +69,5 @@ CreateProjectModal.propTypes = {
   open: PropTypes.bool.isRequired,
   handleHide: PropTypes.func.isRequired,
   handleConfigureLanguage: PropTypes.func.isRequired,
+  lang: PropTypes.string.isRequired,
 };

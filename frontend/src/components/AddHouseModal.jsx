@@ -25,7 +25,7 @@ const DEFAULTSTATE = {
   note: "",
 }
 
-export default function CreateProjectModal({ open, handleHide, handleAddHouse, criteria }) {
+export default function CreateProjectModal({ open, handleHide, handleAddHouse, criteria, lang }) {
   const [address, setAddress] = useState(DEFAULTSTATE.address);
   const [scores, setScores] = useState(DEFAULTSTATE.scores);
   const [notes, setNotes] = useState(DEFAULTSTATE.notes);
@@ -50,14 +50,14 @@ export default function CreateProjectModal({ open, handleHide, handleAddHouse, c
     <Modal open={open} onClose={handleHide}>
       <Box sx={style}>
         <Box display={"flex"} justifyContent={"space-between"}>
-          <Typography variant="h4">House Information</Typography>
+          <Typography variant="h4">{lang === "en" ? "House Information" : "Información de la casa"}</Typography>
           <IconButton onClick={handleHide}><CloseIcon /></IconButton>
         </Box>
         <Box component="form" noValidate autoComplete="off">
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
               <FormControl fullWidth>
-                <InputLabel htmlFor="address">Address</InputLabel>
+                <InputLabel htmlFor="address">{lang === "en" ? "Address" : "dirección"}</InputLabel>
                 <Input
                   id="address"
                   type="text"
@@ -69,7 +69,7 @@ export default function CreateProjectModal({ open, handleHide, handleAddHouse, c
             </Grid>
             <Grid item xs={12} md={6}>
               <FormControl fullWidth>
-                <InputLabel htmlFor="notes">Notes</InputLabel>
+                <InputLabel htmlFor="notes">{lang === "en" ? "Notes" : "Notas"}</InputLabel>
                 <Input
                   id="notes"
                   type="text"
@@ -85,7 +85,7 @@ export default function CreateProjectModal({ open, handleHide, handleAddHouse, c
                 }}
                 sx={{ mt: 1 }}
               >
-                Add Note
+                {lang === "en" ? "Add Note" : "Añadir Nota"}
               </Button>
               <List>
                 {notes.map((note, index) => (
@@ -127,7 +127,7 @@ export default function CreateProjectModal({ open, handleHide, handleAddHouse, c
                 <Grid item xs={12} md={4}>
                   <FormControl fullWidth>
                     <InputLabel htmlFor={`scores-${index}`} sx={{ color: "rgba(0, 0, 0, .45)" }}>
-                      Score (1-5)
+                      {lang === "en" ? "Score (1-5)" : "Puntuación (1-5)"}
                     </InputLabel>
                     <Input
                       id={`scores-${index}`}
@@ -163,7 +163,7 @@ export default function CreateProjectModal({ open, handleHide, handleAddHouse, c
             type="submit"
             sx={{ mt: 3 }}
           >
-            Add House
+            {lang === "en" ? "Add House" : "Añadir Casa"}
           </Button>
         </Box>
       </Box>
@@ -178,4 +178,5 @@ CreateProjectModal.propTypes = {
   handleHide: PropTypes.func.isRequired,
   handleAddHouse: PropTypes.func.isRequired,
   criteria: PropTypes.arrayOf(PropTypes.object).isRequired,
+  lang: PropTypes.string.isRequired
 };

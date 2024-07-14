@@ -27,7 +27,7 @@ const DEFAULTSTATE = {
   newValues: {},
 }
 
-export default function CreateProjectModal({ open, handleHide, handleCreateProject }) {
+export default function CreateProjectModal({ open, handleHide, handleCreateProject, lang }) {
   const [title, setTitle] = useState(DEFAULTSTATE.title);
   const [description, setDescription] = useState(DEFAULTSTATE.description);
   const [criteria, setCriteria] = useState(DEFAULTSTATE.criteria);
@@ -90,19 +90,19 @@ export default function CreateProjectModal({ open, handleHide, handleCreateProje
     <Modal open={open} onClose={handleHide}>
       <Box sx={style}>
         <Box display={"flex"} justifyContent={"space-between"}>
-          <Typography variant="h4" component="h2" gutterBottom>Create Project</Typography>
+          <Typography variant="h4" component="h2" gutterBottom>{lang === "en" ? "Create Project" : "Crear Proyecto"}</Typography>
           <IconButton onClick={handleHide}><CloseIcon /></IconButton>
         </Box>
         <TextField
           fullWidth
-          label="Title"
+          label={lang === "en" ? "Title" : "Título"}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           margin="normal"
         />
         <TextField
           fullWidth
-          label="Description"
+          label={lang === "en" ? "Description" : "Descripción"}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           margin="normal"
@@ -110,11 +110,11 @@ export default function CreateProjectModal({ open, handleHide, handleCreateProje
           rows={2}
         />
         <Typography variant="h5" component="h3" gutterBottom sx={{ mt: 3 }}>
-          Project Criteria
+          {lang === "en" ? "Project Criteria" : "Criterios del Proyecto"}
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
           <FormControl fullWidth>
-            <InputLabel>Category</InputLabel>
+            <InputLabel>{lang === "en" ? "Category" : "Categoría"}</InputLabel>
             <Select
               value={criteriaCategory}
               onChange={(e) => setCriteriaCategory(e.target.value)}
@@ -127,7 +127,7 @@ export default function CreateProjectModal({ open, handleHide, handleCreateProje
           </FormControl>
           <TextField
             fullWidth
-            label="Criteria"
+            label={lang === "en" ? "Criteria" : "Criterio"}
             placeholder={`${criteriaCategory} Criteria`}
             value={categoryValue}
             onChange={(e) => setCategoryValue(e.target.value)}
@@ -135,9 +135,9 @@ export default function CreateProjectModal({ open, handleHide, handleCreateProje
           <Button
             variant="contained"
             onClick={addCriteria}
-            startIcon={<AddIcon />}
+            startIcon={lang === "en" ? <AddIcon /> : null}
           >
-            Add
+            {lang === "en" ? "Add" : "Añadir"}
           </Button>
         </Box>
         <List>
@@ -189,7 +189,7 @@ export default function CreateProjectModal({ open, handleHide, handleCreateProje
           }}
           sx={{ mt: 3 }}
         >
-          Create Project
+          {lang === "en" ? "Create Project" : "Crear Proyecto"}
         </Button>
       </Box>
     </Modal>
@@ -199,5 +199,6 @@ export default function CreateProjectModal({ open, handleHide, handleCreateProje
 CreateProjectModal.propTypes = {
   open: PropTypes.bool.isRequired,
   handleHide: PropTypes.func.isRequired,
-  handleCreateProject: PropTypes.func.isRequired
+  handleCreateProject: PropTypes.func.isRequired,
+  lang: PropTypes.string.isRequired
 };

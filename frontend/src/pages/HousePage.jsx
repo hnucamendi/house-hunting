@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import Cookies from 'js-cookie';
 import { useSessionCheck } from '../utils/authService';
 import AddHouseModal from '../components/AddHouseModal';
 import {
@@ -28,6 +29,11 @@ const HousePage = () => {
   const location = useLocation();
 
   const projectId = location.pathname.split('/')[2];
+
+  const language = useMemo(() => {
+    return userProject?.settings?.language || Cookies.get('language') || "en"
+  }, [userProject]);
+
 
   const calculateAverageScore = (houseEntries) => {
     return houseEntries.map((houseEntry) => ({
@@ -128,7 +134,7 @@ const HousePage = () => {
           onClick={() => setIsAddHouseModalOpen(true)}
           sx={{ mb: 3 }}
         >
-          Add House
+          {language === "en" ? "Add House" : "Añadir Casa"}
         </Button>
         <AddHouseModal
           open={isAddHouseModalOpen}
@@ -177,7 +183,7 @@ const HousePage = () => {
         </Grid>
       ) : (
         <Typography variant="h6" color="textSecondary" align="center">
-          No house entries found. Add a house to get started!
+          {language === "en" ? "No house entries found. Add a house to get started!" : "No se encontraron entradas de casas. ¡Agrega una casa para comenzar!"}
         </Typography>
       )}
     </Container>

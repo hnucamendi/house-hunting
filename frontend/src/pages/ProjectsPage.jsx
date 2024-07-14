@@ -27,7 +27,7 @@ const ProjectsPage = () => {
   const [settingsChange, setSettingsChange] = useState(0);
 
   const url = useMemo(() => {
-    return new URL(`https://api.hnucamendi.net/`);
+    return new URL(`https://api.homemendi.com/`);
   }, []);
 
   const language = useMemo(() => {
@@ -142,18 +142,18 @@ const ProjectsPage = () => {
   return (
     <Container maxWidth="lg" >
       <Box my={4}>
-        <IconButton onClick={() => setIsSettingsModalOpen((prev) => !prev)}><SettingsIcon /></IconButton>
+        <IconButton onClick={() => setIsSettingsModalOpen(!isSettingsModalOpen)}><SettingsIcon /></IconButton>
         <Typography variant="h2" align="center" gutterBottom>
-          Your Projects
+          {language === "en" ? "Your Projects" : "Tus Proyectos"}
         </Typography>
         <Box display="flex" justifyContent="center" mb={4}>
           <Button
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
-            onClick={() => setIsCreateProjectModalOpen((prev) => !prev)}
+            onClick={() => setIsCreateProjectModalOpen(!isCreateProjectModalOpen)}
           >
-            Create New Project
+            {language === "en" ? "Create New Project" : "Crear Nuevo Proyecto"}
           </Button>
         </Box>
         {projects && projects.length > 0 ? (
@@ -171,7 +171,7 @@ const ProjectsPage = () => {
                   </CardContent>
                   <CardActions>
                     <Button size="small" color="primary" href={`/projects/${project.projectId}`}>
-                      View Project
+                      {language === "en" ? "View Project" : "Ver Proyecto"}
                     </Button>
                   </CardActions>
                 </Card>
@@ -181,10 +181,10 @@ const ProjectsPage = () => {
         ) : (
           <Box textAlign="center" mt={4}>
             <Typography variant="h5" gutterBottom>
-              You dont have any projects yet!
+              {language === "en" ? "You dont have any projects yet!" : "¡Aún no tienes proyectos!"}
             </Typography>
             <Typography variant="body1">
-              Click the button above to create your first project.
+              {language === "en" ? "Click the button above to create your first project." : "Haz clic en el botón de arriba para crear tu primer proyecto."}
             </Typography>
           </Box>
         )}
@@ -192,14 +192,16 @@ const ProjectsPage = () => {
 
       <CreateProjectModal
         open={isCreateProjectModalOpen}
-        handleHide={() => setIsCreateProjectModalOpen((prev) => !prev)}
+        handleHide={() => setIsCreateProjectModalOpen(!isCreateProjectModalOpen)}
         handleCreateProject={handleCreateProject}
+        lang={language}
       />
 
       <SettingsModal
         open={isSettingsModalOpen}
-        handleHide={() => setIsSettingsModalOpen((prev) => !prev)}
+        handleHide={() => setIsSettingsModalOpen(!isSettingsModalOpen)}
         handleConfigureLanguage={handleConfigureLanguage}
+        lang={language}
       />
     </Container>
   );
