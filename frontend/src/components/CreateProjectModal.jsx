@@ -36,6 +36,7 @@ export default function CreateProjectModal({ open, handleHide, handleCreateProje
   const [newValues, setNewValues] = useState(DEFAULTSTATE.newValues);
 
   const categories = ["Bedroom", "Bathroom", "Kitchen", "Living Room", "Dining Room", "Garage", "Yard", "Outdoors", "Basement", "Attic", "Laundry Room", "Office", "Gym", "Storage", "Other"];
+  const spanishCategories = ["Dormitorio", "Baño", "Cocina", "Sala de estar", "Comedor", "Garaje", "Patio", "Exteriores", "Sótano", "Ático", "Lavandería", "Oficina", "Gimnasio", "Almacenamiento", "Otro"];
 
   const isFormFilled = title && description && criteria.length > 0;
 
@@ -120,7 +121,9 @@ export default function CreateProjectModal({ open, handleHide, handleCreateProje
               onChange={(e) => setCriteriaCategory(e.target.value)}
               label="Category"
             >
-              {categories.map((category) => (
+              {lang === "en" ? categories.map((category) => (
+                <MenuItem key={category} value={category}>{category}</MenuItem>
+              )) : spanishCategories.map((category) => (
                 <MenuItem key={category} value={category}>{category}</MenuItem>
               ))}
             </Select>

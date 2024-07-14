@@ -74,7 +74,7 @@ const ProjectsPage = () => {
         {
           method: "PUT",
           body: JSON.stringify({
-            settings: { ln }
+            settings: { language: ln }
           }),
           headers: {
             Accept: 'application/json',
@@ -103,14 +103,12 @@ const ProjectsPage = () => {
 
     url.pathname = 'project';
 
-    console.log({ project: { title, description, criteria } });
-
     try {
       const response = await fetch(url,
         {
           method: "POST",
           body: JSON.stringify({
-            settings: { language },
+            settings: { language: language },
             project: { title, description, criteria }
           }),
           headers: {
