@@ -128,7 +128,7 @@ const ProjectsPage = () => {
   return (
     <Container maxWidth="lg" >
       <Box my={4}>
-        <IconButton onClick={setIsSettingsModalOpen((prev) => !prev)}><SettingsIcon /></IconButton>
+        <IconButton onClick={() => setIsSettingsModalOpen((prev) => !prev)}><SettingsIcon /></IconButton>
         <Typography variant="h2" align="center" gutterBottom>
           Your Projects
         </Typography>
