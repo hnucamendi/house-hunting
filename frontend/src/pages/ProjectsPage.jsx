@@ -2,6 +2,7 @@ import { useMemo, useEffect, useState } from 'react';
 import { useSessionCheck } from '../utils/authService';
 import CreateProjectModal from '../components/CreateProjectModal';
 import SettingsModal from '../components/SettingsModal';
+import Cookies from 'js-cookie';
 import {
   Box,
   Button,
@@ -28,6 +29,10 @@ const ProjectsPage = () => {
   const url = useMemo(() => {
     return new URL(`https://api.hnucamendi.net/`);
   }, []);
+
+  const language = useMemo(() => {
+    return projects?.settings?.language || Cookies.get('language') || "en"
+  }, [projects]);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -58,14 +63,18 @@ const ProjectsPage = () => {
     fetchProjects();
   }, [uploadProjectCount, settingsChange]);
 
-  const handleConfigureLanguage = async (language) => {
+  const setLanguageCookie = (lang) => {
+    Cookies.set('language', lang, { expires: 365, path: '/', sameSite: 'strict' });
+  };
+
+  const handleConfigureLanguage = async (ln) => {
     url.pathname = 'settings';
     try {
       const response = await fetch(url,
         {
-          method: "POST",
+          method: "PUT",
           body: JSON.stringify({
-            settings: { language }
+            settings: { ln }
           }),
           headers: {
             Accept: 'application/json',
@@ -76,6 +85,8 @@ const ProjectsPage = () => {
       if (!response.ok) {
         throw new Error("HTTP status " + response.status);
       }
+
+      setLanguageCookie(ln);
       setSettingsChange(prev => prev + 1);
       setIsSettingsModalOpen(false);
     } catch (error) {
@@ -91,6 +102,8 @@ const ProjectsPage = () => {
     }
 
     url.pathname = 'project';
+
+    console.log({ project: { title, description, criteria } });
 
     try {
       const response = await fetch(url,

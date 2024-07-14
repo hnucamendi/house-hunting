@@ -74,10 +74,10 @@ type UserConfig struct {
 }
 
 type User struct {
-	Id        string     `json:"id"`
-	ProjectId string     `json:"projectId"`
-	Settings  UserConfig `json:"settings"`
-	Project   Project    `json:"project"`
+	Id        string     `json:"id" dynamodbav:"id"`
+	ProjectId string     `json:"projectId" dynamodbav:"projectId"`
+	Settings  UserConfig `json:"settings" dynamodbav:"settings"`
+	Project   Project    `json:"project" dynamodbav:"project"`
 }
 
 func (jwt *Token) decodeSegment(seg string) ([]byte, error) {
