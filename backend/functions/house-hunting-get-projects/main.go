@@ -84,11 +84,15 @@ type Project struct {
 	HouseEntries []HouseEntry `json:"houseEntries"`
 }
 
+type UserConfig struct {
+	Language string `json:"language"`
+}
+
 type User struct {
-	Id        string  `json:"id"`
-	ProjectId string  `json:"projectId"`
-	Email     string  `json:"email"`
-	Project   Project `json:"project"`
+	Id        string     `json:"id"`
+	ProjectId string     `json:"projectId"`
+	Settings  UserConfig `json:"settings"`
+	Project   Project    `json:"project"`
 }
 
 func (jwt *Token) decodeSegment(seg string) ([]byte, error) {

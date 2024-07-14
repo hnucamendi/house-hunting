@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { useSessionCheck } from '../utils/authService';
 import CreateProjectModal from '../components/CreateProjectModal';
+import SettingsModal from '../components/SettingsModal';
 import {
   Box,
   Button,
@@ -11,28 +12,34 @@ import {
   CardContent,
   CardActions,
   CircularProgress,
+  IconButton,
 } from '@mui/material';
-import { Add as AddIcon } from '@mui/icons-material';
+import { Add as AddIcon, AdminPanelSettings as SettingsIcon } from '@mui/icons-material';
 
 const ProjectsPage = () => {
   useSessionCheck();
   const [projects, setProjects] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [uploadProjectCount, setUploadProjectCount] = useState(0);
+  const [settingsChange, setSettingsChange] = useState(0);
 
-  const url = "https://api.hnucamendi.net/projects";
+  const url = useMemo(() => {
+    return new URL(`https://api.hnucamendi.net/`);
+  }, []);
 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch(url, {
-          method: "GET",
-          headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${sessionStorage.getItem('idToken')}`
-          }
-        });
+        const response = await fetch("https://api.homemendi.com/projects",
+          {
+            method: "GET",
+            headers: {
+              Accept: 'application/json',
+              Authorization: `Bearer ${sessionStorage.getItem('idToken')}`
+            }
+          });
 
         if (!response.ok) {
           throw new Error("HTTP status " + response.status);
@@ -49,7 +56,33 @@ const ProjectsPage = () => {
     };
 
     fetchProjects();
-  }, [url, uploadProjectCount]);
+  }, [uploadProjectCount, settingsChange]);
+
+  const handleConfigureLanguage = async (language) => {
+    url.pathname = 'settings';
+    try {
+      const response = await fetch(url,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            settings: { language }
+          }),
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${sessionStorage.getItem('idToken')}`
+          }
+        });
+
+      if (!response.ok) {
+        throw new Error("HTTP status " + response.status);
+      }
+      setSettingsChange(prev => prev + 1);
+      setIsSettingsModalOpen(false);
+    } catch (error) {
+      console.error(`Error configuring language:`, error);
+      alert("Failed to configure language. Please try again.");
+    }
+  };
 
   const handleCreateProject = async (title, description, criteria) => {
     if (title === "" || description === "" || criteria.length === 0) {
@@ -57,17 +90,20 @@ const ProjectsPage = () => {
       return;
     }
 
+    url.pathname = 'project';
+
     try {
-      const response = await fetch('https://api.hnucamendi.net/project', {
-        method: "POST",
-        body: JSON.stringify({
-          project: { title, description, criteria }
-        }),
-        headers: {
-          Accept: 'application/json',
-          Authorization: `Bearer ${sessionStorage.getItem('idToken')}`
-        }
-      });
+      const response = await fetch(url,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            project: { title, description, criteria }
+          }),
+          headers: {
+            Accept: 'application/json',
+            Authorization: `Bearer ${sessionStorage.getItem('idToken')}`
+          }
+        });
 
       if (!response.ok) {
         throw new Error("HTTP status " + response.status);
@@ -90,8 +126,9 @@ const ProjectsPage = () => {
   }
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="lg" >
       <Box my={4}>
+        <IconButton onClick={setIsSettingsModalOpen((prev) => !prev)}><SettingsIcon /></IconButton>
         <Typography variant="h2" align="center" gutterBottom>
           Your Projects
         </Typography>
@@ -100,7 +137,7 @@ const ProjectsPage = () => {
             variant="contained"
             color="primary"
             startIcon={<AddIcon />}
-            onClick={() => setIsCreateProjectModalOpen(true)}
+            onClick={() => setIsCreateProjectModalOpen((prev) => !prev)}
           >
             Create New Project
           </Button>
@@ -141,8 +178,14 @@ const ProjectsPage = () => {
 
       <CreateProjectModal
         open={isCreateProjectModalOpen}
-        handleHide={() => setIsCreateProjectModalOpen(false)}
+        handleHide={() => setIsCreateProjectModalOpen((prev) => !prev)}
         handleCreateProject={handleCreateProject}
+      />
+
+      <SettingsModal
+        open={isSettingsModalOpen}
+        handleHide={() => setIsSettingsModalOpen((prev) => !prev)}
+        handleConfigureLanguage={handleConfigureLanguage}
       />
     </Container>
   );

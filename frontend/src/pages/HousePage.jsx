@@ -45,13 +45,14 @@ const HousePage = () => {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: {
-            Accept: 'application/json',
-            Authorization: `Bearer ${sessionStorage.getItem('idToken')}`,
-          },
-        });
+        const response = await fetch(url,
+          {
+            method: 'GET',
+            headers: {
+              Accept: 'application/json',
+              Authorization: `Bearer ${sessionStorage.getItem('idToken')}`,
+            },
+          });
         const data = await response.json();
         const updatedData = {
           ...data,
@@ -67,7 +68,7 @@ const HousePage = () => {
     };
 
     fetchProject();
-  }, [url, houseEntryCount]);
+  }, [projectId, url, houseEntryCount]);
 
   const handleAddHouse = async (address, scores, notes) => {
     if (address === '') {
