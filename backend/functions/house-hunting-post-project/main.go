@@ -69,11 +69,15 @@ type Project struct {
 	Criteria    []Criteria `json:"criteria"`
 }
 
+type UserConfig struct {
+	Language string `json:"language"`
+}
+
 type User struct {
-	Id        string  `json:"id" dynamodbav:"id"`
-	ProjectId string  `json:"projectId" dynamodbav:"projectId"`
-	Email     string  `json:"email" dynamodbav:"email"`
-	Project   Project `json:"project" dynamodbav:"project"`
+	Id        string     `json:"id"`
+	ProjectId string     `json:"projectId"`
+	Settings  UserConfig `json:"settings"`
+	Project   Project    `json:"project"`
 }
 
 func (jwt *Token) decodeSegment(seg string) ([]byte, error) {
@@ -119,11 +123,11 @@ func (jwt *Token) processJWT() string {
 
 func (u *User) generateId(pre IDType, identifier string) string {
 	if pre == USERID {
-		b := []byte(fmt.Sprintf("%s::%s", pre, u.Email))
+		b := []byte(fmt.Sprintf("%s::%s", pre, identifier))
 		return fmt.Sprintf("%x", md5.Sum(b))
 	}
 
-	b := []byte(fmt.Sprintf("%s::%s::%s", pre, u.Email, identifier))
+	b := []byte(fmt.Sprintf("%s::%s::%s", pre, identifier, identifier))
 	return fmt.Sprintf("%x", md5.Sum(b))
 }
 
@@ -142,8 +146,8 @@ func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (
 		JWTPayload{},
 	}
 
-	user.Email = token.processJWT()
-	user.Id = user.generateId(USERID, "")
+	email := token.processJWT()
+	user.Id = user.generateId(USERID, email)
 	user.ProjectId = user.generateId(PROJECTID, user.Project.Title)
 
 	for i := range user.Project.Criteria {
