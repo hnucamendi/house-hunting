@@ -128,8 +128,15 @@ func generateId(pre IDType, identifier string) string {
 	return fmt.Sprintf("%x", md5.Sum(b))
 }
 
-func getProjects() ([]User, error) {
-	resp, err := http.Get("https://api.homemendi.com/projects")
+func getProjects(token string) ([]User, error) {
+	request, err := http.NewRequest("GET", "https://api.homemendi.com/projects", nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %v", err)
+	}
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+token)
+
+	resp, err := http.DefaultClient.Do(request)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get projects: %v", err)
 	}
@@ -167,7 +174,7 @@ func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (
 		}, nil
 	}
 
-	projs, err := getProjects()
+	projs, err := getProjects(token.Headers["authorization"])
 	if err != nil {
 		return &events.APIGatewayV2HTTPResponse{
 			StatusCode: 500,
