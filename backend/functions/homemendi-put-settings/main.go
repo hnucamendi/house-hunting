@@ -134,7 +134,7 @@ func getProjects(token string) ([]User, error) {
 		return nil, fmt.Errorf("failed to create request: %v", err)
 	}
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "Bearer "+token)
+	request.Header.Set("Authorization", token)
 
 	resp, err := http.DefaultClient.Do(request)
 	if err != nil {
