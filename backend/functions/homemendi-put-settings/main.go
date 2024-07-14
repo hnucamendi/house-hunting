@@ -128,25 +128,25 @@ func generateId(pre IDType, identifier string) string {
 	return fmt.Sprintf("%x", md5.Sum(b))
 }
 
-func getProjects() (User, error) {
+func getProjects() ([]User, error) {
 	resp, err := http.Get("https://api.homemendi.com/projects")
 	if err != nil {
-		return User{}, fmt.Errorf("failed to get projects: %v", err)
+		return nil, fmt.Errorf("failed to get projects: %v", err)
 	}
 
 	defer resp.Body.Close()
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return User{}, fmt.Errorf("failed to read response body: %v", err)
+		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
 
-	var user User
-	if err := json.Unmarshal(respBody, &user); err != nil {
-		return User{}, fmt.Errorf("failed to unmarshal users: %v\n%v", err, string(respBody))
+	var users []User
+	if err := json.Unmarshal(respBody, &users); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal users: %v\n%v", err, string(respBody))
 	}
 
-	return user, nil
+	return users, nil
 }
 
 func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
