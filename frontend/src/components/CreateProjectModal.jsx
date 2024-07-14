@@ -203,5 +203,5 @@ CreateProjectModal.propTypes = {
   open: PropTypes.bool.isRequired,
   handleHide: PropTypes.func.isRequired,
   handleCreateProject: PropTypes.func.isRequired,
-  lang: PropTypes.string.isRequired
+  lang: PropTypes.string
 };

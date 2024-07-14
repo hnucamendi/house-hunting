@@ -178,5 +178,5 @@ CreateProjectModal.propTypes = {
   handleHide: PropTypes.func.isRequired,
   handleAddHouse: PropTypes.func.isRequired,
   criteria: PropTypes.arrayOf(PropTypes.object).isRequired,
-  lang: PropTypes.string.isRequired
+  lang: PropTypes.string
 };
