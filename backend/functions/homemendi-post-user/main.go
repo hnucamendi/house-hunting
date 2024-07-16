@@ -127,8 +127,21 @@ func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (
 	item := &dynamodb.GetItemInput{
 		TableName: aws.String("UsersTable"),
 		Key: map[string]types.AttributeValue{
-			"id": &types.AttributeValueMemberS{
-				Value: id,
+			"PK": &types.AttributeValueMemberS{
+				Value: fmt.Sprintf("USER#%s", id),
+			},
+			"SK": &types.AttributeValueMemberS{
+				Value: fmt.Sprintf("METADATA#%s", id),
+			},
+			"settings": &types.AttributeValueMemberM{
+				Value: map[string]types.AttributeValue{
+					"language": &types.AttributeValueMemberS{
+						Value: "en",
+					},
+					"role": &types.AttributeValueMemberS{
+						Value: "user",
+					},
+				},
 			},
 		},
 	}
