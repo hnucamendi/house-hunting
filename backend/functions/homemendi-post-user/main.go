@@ -2,7 +2,8 @@ package main
 
 import (
 	"context"
-	"crypto/md5"
+	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -31,6 +32,12 @@ func init() {
 }
 
 type IDType string
+type Role string
+
+const (
+	BUYROLE     Role = "BUYER"
+	REALTORROLE Role = "REALTOR"
+)
 
 const (
 	USERID     IDType = "USERID"
@@ -110,9 +117,21 @@ func (jwt *Token) processJWT() string {
 	return jwt.JWT.Email
 }
 
-func generateId(pre IDType, key string) string {
-	b := []byte(fmt.Sprintf("%s::%s", pre, key))
-	return fmt.Sprintf("%x", md5.Sum(b))
+func generateUserId(email string) string {
+	hash := sha256.Sum256([]byte(email))
+	return fmt.Sprintf("usr_%s", base64.URLEncoding.EncodeToString(hash[:])[:22])
+}
+
+func generateProjectId(name string) string {
+	uuid := make([]byte, 16)
+	rand.Read(uuid)
+	return fmt.Sprintf("prj_%s_%s", name, base64.URLEncoding.EncodeToString(uuid)[:22])
+}
+
+func generateCriteriaId(name string) string {
+	uuid := make([]byte, 16)
+	rand.Read(uuid)
+	return fmt.Sprintf("crit_%s_%s", name, base64.URLEncoding.EncodeToString(uuid)[:22])
 }
 
 func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (*events.APIGatewayV2HTTPResponse, error) {
@@ -122,7 +141,7 @@ func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (
 	}
 
 	email := token.processJWT()
-	id := generateId(USERID, email)
+	id := generateUserId(email)
 
 	item := &dynamodb.GetItemInput{
 		TableName: aws.String("UsersTable"),
@@ -139,7 +158,7 @@ func HandleRequest(ctx context.Context, event *events.APIGatewayV2HTTPRequest) (
 						Value: "en",
 					},
 					"role": &types.AttributeValueMemberS{
-						Value: "user",
+						Value: string(BUYROLE),
 					},
 				},
 			},
